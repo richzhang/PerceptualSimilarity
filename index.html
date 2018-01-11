@@ -212,7 +212,7 @@
 	  		 	<center><h1>Abstract</h1></center>
 	  		 	<tr>
 		            <!-- <td align=center width=600px> -->
-					While it's easy for us to quickly assess the perceptual similarity between two images, the  processes underlying our judgments are thought to be quite complex. Despite this, the most widely used perceptual metrics today, such as PSNR and SSIM, are simple, shallow functions, and fail to account for many known nuances of human perception. Might deep networks be able to better model these subtleties? Here, we evaluate the effectiveness of deep features as a perceptual metric. To do this, we introduce a new Full Reference Image Quality Assessment (FR-IQA) dataset, collected in the wild over a large number of distortions. We evaluate existing low-level perceptually-motivated image metrics, as well as deep features trained on different tasks or with self-supervision, as well as training directly on our dataset of human judgments. We find that deep features perform remarkably well, yielding large improvements over current state-of-the-art metrics. We further improve on out-of-the-box networks by linearly "calibrating" existing deep representations. These results add to an emerging picture that deep features map surprisingly well to human perceptual judgments, and that their performance is consistent across a range of architectures, training tasks, and supervision regimes.
+					While it is nearly effortless for humans to quickly assess the perceptual similarity between two images, the  underlying processes are thought to be quite complex. Despite this, the most widely used perceptual metrics today, such as PSNR and SSIM, are simple, shallow functions, and fail to account for many nuances of human perception. Recently, the deep learning community has found that features of the VGG network trained on the ImageNet classification task has been remarkably useful as a training loss for image synthesis. But how perceptual are these so-called "perceptual losses"? What elements are critical for their success? To answer these questions, we introduce a new Full Reference Image Quality Assessment (FR-IQA) dataset of perceptual human judgments, orders of magnitude larger than previous datasets. We systematically evaluate deep features across different architectures and tasks and compare them with classic metrics. We find that deep features outperform all previous metrics by huge margins. More surprisingly, this result is not restricted to ImageNet-trained VGG features, but holds across different deep architectures and levels of supervision (supervised, self-supervised, or even unsupervised). Our results suggest that perceptual similarity is an emergent property shared across deep visual representations.
 					<!-- </td> -->
 				</tr>
   		  <br>
@@ -269,15 +269,16 @@
   		  <br>
 		  <hr>
 
-<!--   		  <table align=center width=1100px>
+  		  <table align=center width=1100px>
   			  <tr>
   	              <td width=400px>
   					<left>
 	  		  <center><h1>Acknowledgements</h1></center>
+	  		  This research was supported, in part, by grants from Berkeley Deep Drive, NSF IIS-1633310, and hardware donations by NVIDIA Corp. We thank members of the Berkeley AI Research Lab and Adobe Creative Intelligence Lab for helpful discussions. We also thank Radu Timofte, Zhaowen Wang, Michael Waechter, Simon Niklaus, and Sergio Guadarrama for help preparing data. RZ is partially supported by an Adobe Research Fellowship, and much of this work was done while RZ was an intern at Adobe Research.
 			</left>
 		</td>
 			 </tr>
-		</table> -->
+		</table>
 
 		<br><br>
 
