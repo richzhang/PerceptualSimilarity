@@ -1,0 +1,6 @@
+@inproceedings{zhang2018perceptual,
+  title={The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric},
+  author={Zhang, Richard and Isola, Phillip and Efros, Alexei A and Shechtman, Eli and Wang, Oliver},
+  booktitle={ArXiv},
+  year={2018}
+}
