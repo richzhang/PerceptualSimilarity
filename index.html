@@ -1,0 +1,307 @@
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">google.load("jquery", "1.3.2");</script>
+
+<style type="text/css">
+	body {
+		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+		font-weight:300;
+		font-size:18px;
+		margin-left: auto;
+		margin-right: auto;
+		width: 1100px;
+	}
+	h1 {
+		font-weight:300;
+	}
+
+	.disclaimerbox {
+		background-color: #eee;
+		border: 1px solid #eeeeee;
+		border-radius: 10px ;
+		-moz-border-radius: 10px ;
+		-webkit-border-radius: 10px ;
+		padding: 20px;
+	}
+
+	video.header-vid {
+		height: 140px;
+		border: 1px solid black;
+		border-radius: 10px ;
+		-moz-border-radius: 10px ;
+		-webkit-border-radius: 10px ;
+	}
+
+	img.header-img {
+		height: 140px;
+		border: 1px solid black;
+		border-radius: 10px ;
+		-moz-border-radius: 10px ;
+		-webkit-border-radius: 10px ;
+	}
+
+	img.rounded {
+		border: 0px solid #eeeeee;
+		border-radius: 10px ;
+		-moz-border-radius: 10px ;
+		-webkit-border-radius: 10px ;
+	}
+
+	a:link,a:visited
+	{
+		color: #1367a7;
+		text-decoration: none;
+	}
+	a:hover {
+		color: #208799;
+	}
+
+	td.dl-link {
+		height: 160px;
+		text-align: center;
+		font-size: 22px;
+	}
+
+	.layered-paper-big { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
+		box-shadow:
+		        0px 0px 1px 1px rgba(0,0,0,0.35), /* The top layer shadow */
+		        5px 5px 0 0px #fff, /* The second layer */
+		        5px 5px 1px 1px rgba(0,0,0,0.35), /* The second layer shadow */
+		        10px 10px 0 0px #fff, /* The third layer */
+		        10px 10px 1px 1px rgba(0,0,0,0.35), /* The third layer shadow */
+		        15px 15px 0 0px #fff, /* The fourth layer */
+		        15px 15px 1px 1px rgba(0,0,0,0.35), /* The fourth layer shadow */
+		        20px 20px 0 0px #fff, /* The fifth layer */
+		        20px 20px 1px 1px rgba(0,0,0,0.35), /* The fifth layer shadow */
+		        25px 25px 0 0px #fff, /* The fifth layer */
+		        25px 25px 1px 1px rgba(0,0,0,0.35); /* The fifth layer shadow */
+		margin-left: 10px;
+		margin-right: 45px;
+	}
+
+
+	.layered-paper { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
+		box-shadow:
+		        0px 0px 1px 1px rgba(0,0,0,0.35), /* The top layer shadow */
+		        5px 5px 0 0px #fff, /* The second layer */
+		        5px 5px 1px 1px rgba(0,0,0,0.35), /* The second layer shadow */
+		        10px 10px 0 0px #fff, /* The third layer */
+		        10px 10px 1px 1px rgba(0,0,0,0.35); /* The third layer shadow */
+		margin-top: 5px;
+		margin-left: 10px;
+		margin-right: 30px;
+		margin-bottom: 5px;
+	}
+
+	.vert-cent {
+		position: relative;
+	    top: 50%;
+	    transform: translateY(-50%);
+	}
+
+	hr
+	{
+		border: 0;
+		height: 1px;
+		background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+	}
+</style>
+
+<html>
+  <head>
+		<title>The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric</title>
+		<meta property="og:image" content="https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg" />
+		<meta property="og:title" content="The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric. In ArXiv, 2018." />
+  </head>
+
+  <body>
+    <br>
+          <center>
+          	<span style="font-size:34px">The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric</span><br>
+	  		  <table align=center width=900px>
+	  			  <tr>
+	  	              <td align=center width=200px>
+	  					<center>
+	  						<span style="font-size:24px"><a href="https://richzhang.github.io/">Richard Zhang</a></span><sup>1</sup>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=200px>
+	  					<center>
+	  						<span style="font-size:24px"><a href="https://phillipi.github.io/">Phillip Isola</a></span><sup>1</sup>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=200px>
+	  					<center>
+	  						<span style="font-size:24px"><a href="http://www.eecs.berkeley.edu/~efros/">Alexei A. Efros</a></span><sup>1</sup>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=200px>
+	  					<center>
+	  						<span style="font-size:24px"><a href="https://research.adobe.com/person/eli-shechtman/">Eli Shechtman</a></span><sup>2</sup>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=200px>
+	  					<center>
+	  						<span style="font-size:24px"><a href="http://www.oliverwang.info/">Oliver Wang</a></span><sup>2</sup>
+		  		  		</center>
+		  		  	  </td>
+	  			  </tr>
+			  </table>
+	  		  <table align=center width=1100px>
+	  			  <tr>
+	  	              <td align=center width=100px>
+	  					<center>
+				          	<span style="font-size:18px"></span>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=200px>
+	  					<center>
+				          	<span style="font-size:18px"><sup>1</sup>Berkeley Artificial Intelligence Research</span>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=200px>
+	  					<center>
+				          	<span style="font-size:18px"><sup>2</sup>Adobe Creative Intelligence Laboratory</span>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=100px>
+	  					<center>
+				          	<span style="font-size:18px"></span>
+		  		  		</center>
+		  		  	  </td>
+			  </table>
+	  		  <table align=center width=1100px>
+	  			  <tr>
+	  	              <td align=center width=275px>
+	  					<center>
+				          	<span style="font-size:18px"></span>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=225px>
+	  					<center>
+	  						<span style="font-size:22px">Code <a href='https://github.com/richzhang/PerceptualMetric'> [GitHub]</a></span>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=225px>
+	  					<center>
+	  						<span style="font-size:22px">ArXiv 2018<a href=""> [Paper]</a></span>
+		  		  		</center>
+		  		  	  </td>
+	  	              <td align=center width=275px>
+	  					<center>
+				          	<span style="font-size:18px"></span>
+		  		  		</center>
+		  		  	  </td>
+			  </table>
+          </center>
+
+  		  <table align=center width=1100px>
+  			  <tr>
+  	              <td width=400px>
+  					<center>
+  	                	<img class="rounded" src = "./index_files/fig1_v2.jpg" width="1100px"></img>
+  	                	<br>
+					</center>
+  	              </td>
+  	              </tr>
+  	              </table>
+
+  		  <br>
+		  <hr>
+
+  		  <table align=center width=900px>
+	  		 	<center><h1>Abstract</h1></center>
+	  		 	<tr>
+		            <!-- <td align=center width=600px> -->
+					While it's easy for us to quickly assess the perceptual similarity between two images, the  processes underlying our judgments are thought to be quite complex. Despite this, the most widely used perceptual metrics today, such as PSNR and SSIM, are simple, shallow functions, and fail to account for many known nuances of human perception. Might deep networks be able to better model these subtleties? Here, we evaluate the effectiveness of deep features as a perceptual metric. To do this, we introduce a new Full Reference Image Quality Assessment (FR-IQA) dataset, collected in the wild over a large number of distortions. We evaluate existing low-level perceptually-motivated image metrics, as well as deep features trained on different tasks or with self-supervision, as well as training directly on our dataset of human judgments. We find that deep features perform remarkably well, yielding large improvements over current state-of-the-art metrics. We further improve on out-of-the-box networks by linearly "calibrating" existing deep representations. These results add to an emerging picture that deep features map surprisingly well to human perceptual judgments, and that their performance is consistent across a range of architectures, training tasks, and supervision regimes.
+					<!-- </td> -->
+				</tr>
+  		  <br>
+		  <hr>
+
+
+ 		<center><h1>Try the Model/Download the Dataset</h1></center>
+
+  		  <table align=center width=900px>
+  			  <tr>
+  	                <td align=center width=900px>
+  					<center>
+						  <td><a href='https://github.com/richzhang/PerceptualSimilarity'><img class="round" style="width:900px" src="./index_files/network.jpg"/></a></td>
+	  		  		</center>
+	  		  		</td>
+			  </tr>
+		  </table>
+
+		  <br>
+
+  		  <table align=center width=800px>
+			  <tr><center>
+				<span style="font-size:28px"><a href='https://github.com/richzhang/PerceptualSimilarity'>[GitHub]</a>
+			  <br>
+			  </center></tr>
+		  </table>
+		  <br>
+
+		  <hr>
+
+  		  <table align=center width=600 px>
+	 		<center><h1>Paper</h1></center>
+  			  <tr>
+				  <td><a href=""><img class="layered-paper-big" style="height:175px" src="./index_files/page1.png"/></a></td>
+				  <td><span style="font-size:12pt">R. Zhang, P. Isola, A. A. Efros, <br>E. Shechtman, O. Wang.</span><br>
+				  <b><span style="font-size:12pt">Toward Multimodal Image-to-Image Translation.</b></span><br>
+				  <span style="font-size:12pt">In ArXiv, 2018. (hosted on <a href="">arXiv</a>)</span></a>
+				  <span style="font-size:4pt"><a href=""><br></a>
+				  </span>
+				  </td>
+  	              </td>
+              </tr>
+  		  </table>
+		  <br>
+
+		  <table align=center width=600px>
+			  <tr>
+				  <td><span style="font-size:24pt"><center>
+				  	<a href="./index_files/bibtex_arxiv2018.txt">[Bibtex]</a>
+  	              </center></td>
+              </tr>
+  		  </table>
+
+  		  <br>
+		  <hr>
+
+<!--   		  <table align=center width=1100px>
+  			  <tr>
+  	              <td width=400px>
+  					<left>
+	  		  <center><h1>Acknowledgements</h1></center>
+			</left>
+		</td>
+			 </tr>
+		</table> -->
+
+		<br><br>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-75863369-4', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-75863369-4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75863369-4');
+</script> -->
+
+
+</body>
+</html>
