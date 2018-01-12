@@ -1,13 +1,13 @@
 
-## Perceptual Similarity Metric and Dataset
+## Perceptual Similarity Metric and Dataset [[Project Page]](http://richzhang.github.io/PerceptualSimilarity/)
 
 This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset** proposed in the following paper:
 
 **The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric**  
-Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, Oliver Wang  
-In ArXiv, 2018  
+[Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/).  
+In [ArXiv, 2018](https://arxiv.org/abs/1801.03924).  
 
-<img src='./imgs/fig1.png' width=1200>
+<img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
 ## (0) Dependencies
 
