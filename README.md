@@ -21,7 +21,7 @@ In the paper, we found that deep network activations work surprisingly well as a
 
 ### Using the metric
 
-File [`test_network.py`](test_network.py) contains example usage. Running `python test_network.py` will take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer?
+File [`test_network.py`](test_network.py) contains example usage. Running `test_network.py` will take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer?
 
 Load a model with the following commands.
 
@@ -33,7 +33,7 @@ model.initialize(model='net-lin',net='alex',use_gpu=True)
 
 Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest and performs the best. Variable `model` can be changed to `net` for an uncalibrated off-the-shelf network.
 
-To call the model, run ```model.forward(im0,im1)```, where ```im0, im1``` are PyTorch tensors with shape ```python Nx3xHxW``` (```N``` patches of size ```HxW```).
+To call the model, run ```model.forward(im0,im1)```, where ```im0, im1``` are PyTorch tensors with shape ```python Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`).
 
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
