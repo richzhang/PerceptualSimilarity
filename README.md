@@ -17,7 +17,7 @@ This repository uses Python 2 or 3, with the following libraries: [PyTorch](www.
 
 ### About the metric
 
-In the paper, we found that deep network activations work surprisingly well as a perceptual similarity metric. This was true across network architectures (SqueezeNet [2.8 MB], AlexNet [9.1 MB], and VGG [58.9 MB] provided similar scores) and supervisory signals (unsupervised, self-supervised, and supervised all perform strongly). We slightly improved scores by linearly "calibrating" networks - adding a linear layer on top of off-the-shelf classification networks. We provide 3 variants, using linear layers on top of the SqueezeNet, AlexNet, and VGG networks. Using this code, you can simply call `model.forward(im0,im1)` to evaluate the distance between two image patches.
+We found that deep network activations work surprisingly well as a perceptual similarity metric. This was true across network architectures (SqueezeNet [2.8 MB], AlexNet [9.1 MB], and VGG [58.9 MB] provided similar scores) and supervisory signals (unsupervised, self-supervised, and supervised all perform strongly). We slightly improved scores by linearly "calibrating" networks - adding a linear layer on top of off-the-shelf classification networks. We provide 3 variants, using linear layers on top of the SqueezeNet, AlexNet (default), and VGG networks. Using this code, you can simply call `model.forward(im0,im1)` to evaluate the distance between two image patches.
 
 ### Using the metric
 
@@ -31,7 +31,7 @@ model = dm.DistModel()
 model.initialize(model='net-lin',net='alex',use_gpu=True)
 ```
 
-Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest and performs the best. Variable `model` can be changed to `net` for an uncalibrated off-the-shelf network.
+Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest and performs the best (not specifying the `net` will default to `alex`). Set `model=net` for an uncalibrated off-the-shelf network (taking cos distance).
 
 To call the model, run ```model.forward(im0,im1)```, where ```im0, im1``` are PyTorch tensors with shape ```python Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`).
 
