@@ -21,7 +21,7 @@ We found that deep network activations work surprisingly well as a perceptual si
 
 ### Using the metric
 
-File [`test_network.py`](test_network.py) contains example usage. Running `test_network.py` will take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer?
+Running `python [`test_network.py`](test_network.py)` will take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer? A more detailed explanation is below.
 
 Load a model with the following commands.
 
@@ -31,9 +31,15 @@ model = dm.DistModel()
 model.initialize(model='net-lin',net='alex',use_gpu=True)
 ```
 
-Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest and performs the best (not specifying the `net` will default to `alex`). Set `model=net` for an uncalibrated off-the-shelf network (taking cos distance).
+Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest, performs the best, and is the default. Set `model=net` for an uncalibrated off-the-shelf network (taking cos distance).
 
-To call the model, run ```model.forward(im0,im1)```, where ```im0, im1``` are PyTorch tensors with shape ```python Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`).
+Finally, to call the model, run
+
+```python
+model.forward(im0,im1)
+```
+
+where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`).
 
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
@@ -103,6 +109,19 @@ Each set contains 3 human evaluations/example.
 Each JND subdirectory contains the following folders:
 - `p0,p1` contain the two patches
 - `same` contains fraction of human evaluators who thought the patches were the same (0 if all humans thought patches were different, 1 if all humans thought patches were the same)
+
+## Citation
+
+If you find this repository useful for your research, please use the following.
+
+```
+@inproceedings{zhang2018perceptual,
+  title={The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric},
+  author={Zhang, Richard and Isola, Phillip and Efros, Alexei A and Shechtman, Eli and Wang, Oliver},
+  booktitle={CVPR},
+  year={2018}
+}
+```
 
 ## Acknowledgements
 
