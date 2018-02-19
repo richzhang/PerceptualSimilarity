@@ -61,7 +61,7 @@ Script `test_dataset_model.py` evaluates a perceptual model on a subset of the d
     - if `dataset_mode` was `2afc`, choices are [`train/traditional`, `train/cnn`, `val/traditional`, `val/cnn`, `val/superres`, `val/deblur`, `val/color`, `val/frameinterp`]
     - if `dataset_mode` was `jnd`, choices are [`val/traditional`, `val/cnn`]
     
-**Perceptual pimilarity model flags**
+**Perceptual similarity model flags**
 - `model`: perceptual similarity model to use
     - `net-lin` for our LPIPS learned similarity model (linear network on top of internal activations of pretrained network)
     - `net` for a classification network (uncalibrated with all layers averaged)
