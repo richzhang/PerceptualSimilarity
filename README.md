@@ -34,10 +34,10 @@ model.initialize(model='net-lin',net='alex',use_gpu=True)
 Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest, performs the best, and is the default. Set `model=net` for an uncalibrated off-the-shelf network (taking cos distance). Finally, to call the model, run
 
 ```python
-model.forward(im0,im1)
+d = model.forward(im0,im1)
 ```
 
-where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`).
+where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). Variable `d` will be a length `N` numpy array.
 
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
