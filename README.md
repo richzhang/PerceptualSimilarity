@@ -21,7 +21,7 @@ We found that deep network activations work surprisingly well as a perceptual si
 
 ### Using the metric
 
-Running `python [`test_network.py`](test_network.py)` will take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer? A more detailed explanation is below.
+Script [`test_network.py`](test_network.py) contains example usage. Run `python text_network.py` to take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer? A more detailed explanation is below.
 
 Load a model with the following commands.
 
