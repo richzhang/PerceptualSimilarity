@@ -31,9 +31,7 @@ model = dm.DistModel()
 model.initialize(model='net-lin',net='alex',use_gpu=True)
 ```
 
-Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest, performs the best, and is the default. Set `model=net` for an uncalibrated off-the-shelf network (taking cos distance).
-
-Finally, to call the model, run
+Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest, performs the best, and is the default. Set `model=net` for an uncalibrated off-the-shelf network (taking cos distance). Finally, to call the model, run
 
 ```python
 model.forward(im0,im1)
