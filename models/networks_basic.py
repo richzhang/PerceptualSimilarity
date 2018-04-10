@@ -22,7 +22,7 @@ class PNet(nn.Module):
 
         self.shift = torch.autograd.Variable(torch.Tensor([-.030, -.088, -.188]).view(1,3,1,1))
         self.scale = torch.autograd.Variable(torch.Tensor([.458, .448, .450]).view(1,3,1,1))
-
+        
         if(self.pnet_type in ['vgg','vgg16']):
             self.net = pn.vgg16(pretrained=not self.pnet_rand,requires_grad=False)
         elif(self.pnet_type=='alex'):
@@ -65,12 +65,13 @@ class PNet(nn.Module):
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_tune=False, use_dropout=False, use_gpu=True):
+    def __init__(self, pnet_type='vgg', pnet_tune=False, use_dropout=False, use_gpu=True, spatial=True):
         super(PNetLin, self).__init__()
 
         self.use_gpu = use_gpu
         self.pnet_type = pnet_type
         self.pnet_tune = pnet_tune
+        self.spatial = spatial
 
         if(self.pnet_type in ['vgg','vgg16']):
             net_type = pn.vgg16
@@ -130,13 +131,20 @@ class PNetLin(nn.Module):
 
         feats0 = {}
         feats1 = {}
-        diffs = {}
+        diffs = [0]*len(outs0)
 
         for (kk,out0) in enumerate(outs0):
             feats0[kk] = util.normalize_tensor(outs0[kk])
             feats1[kk] = util.normalize_tensor(outs1[kk])
             diffs[kk] = (feats0[kk]-feats1[kk])**2
 
+        if self.spatial:
+            lin_models = [self.lin0, self.lin1, self.lin2, self.lin3, self.lin4]
+            if(self.pnet_type=='squeeze'):
+                lin_models.extend([self.lin5, self.lin6])
+            res = [lin_models[kk].model(diffs[kk]) for kk in range(len(diffs))]
+            return res
+			
         val = torch.mean(torch.mean(self.lin0.model(diffs[0]),dim=3),dim=2)
         val = val + torch.mean(torch.mean(self.lin1.model(diffs[1]),dim=3),dim=2)
         val = val + torch.mean(torch.mean(self.lin2.model(diffs[2]),dim=3),dim=2)

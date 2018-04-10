@@ -9,12 +9,17 @@ import util.util as util
 from .base_model import BaseModel
 from . import networks_basic as networks
 from scipy.ndimage import zoom
+import fractions
+import functools
+
+def lcm(a, b):
+    return a*b//fractions.gcd(a, b)
 
 class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False):
+    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False, spatial=False):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -31,10 +36,11 @@ class DistModel(BaseModel):
         self.model = model
         self.net = net
         self.use_gpu = use_gpu
+        self.spatial = spatial
 
         self.model_name = '%s [%s]'%(model,net)
         if(self.model == 'net-lin'): # pretrained net + linear layer
-            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_type=net,use_dropout=True)
+            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_type=net,use_dropout=True,spatial=spatial)
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
@@ -87,10 +93,27 @@ class DistModel(BaseModel):
         self.d0 = self.forward_pair(self.var_ref, self.var_p0)
         self.loss_total = self.d0
 
-        if(retNumpy):
-            return self.d0.cpu().data.numpy().flatten()
+        def convert_output(d0):
+            if(retNumpy):
+                ans = d0.cpu().data.numpy()
+                if not self.spatial:
+                    ans = ans.flatten()
+                else:
+                    assert(ans.shape[0] == 1 and len(ans.shape) == 4)
+                    return ans[0,...].transpose([1, 2, 0])                  # Reshape to usual numpy image format: (height, width, channels)
+                return ans
+            else:
+                return d0
+
+        if self.spatial:
+            L = [convert_output(x) for x in self.d0]
+            height = functools.reduce(lcm, [x.shape[0] for x in L])
+            width  = functools.reduce(lcm, [x.shape[1] for x in L])
+            L = [np.repeat(np.repeat(x, height//x.shape[0], 0), width//x.shape[1], 1) for x in L]
+            L = np.mean(np.concatenate(L, 2) * len(L), 2)
+            return L
         else:
-            return self.d0
+            return convert_output(self.d0)
 
 
 def score_2afc_dataset(data_loader,func):
