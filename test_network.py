@@ -5,7 +5,7 @@ from models import dist_model as dm
 from IPython import embed
 import numpy
 
-use_gpu = False         # Whether to use GPU
+use_gpu = True          # Whether to use GPU
 spatial = False         # Whether to return a spatial map of distance of size height x width
 
 ## Initializing the model
