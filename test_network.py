@@ -1,20 +1,23 @@
+import sys; sys.path += ['models']
 import torch
 from util import util
 from models import dist_model as dm
 from IPython import embed
 
+use_gpu = True
+
 ## Initializing the model
 model = dm.DistModel()
 
 # Linearly calibrated models
-# model.initialize(model='net-lin',net='squeeze',use_gpu=True)
-model.initialize(model='net-lin',net='alex',use_gpu=True)
-# model.initialize(model='net-lin',net='vgg',use_gpu=True)
+# model.initialize(model='net-lin',net='squeeze',use_gpu=use_gpu)
+model.initialize(model='net-lin',net='alex',use_gpu=use_gpu)
+# model.initialize(model='net-lin',net='vgg',use_gpu=use_gpu)
 
 # Off-the-shelf uncalibrated networks
-# model.initialize(model='net',net='squeeze',use_gpu=True)
-# model.initialize(model='net',net='alex',use_gpu=True)
-# model.initialize(model='net',net='vgg',use_gpu=True)
+# model.initialize(model='net',net='squeeze',use_gpu=use_gpu)
+# model.initialize(model='net',net='alex',use_gpu=use_gpu)
+# model.initialize(model='net',net='vgg',use_gpu=use_gpu)
 
 # Low-level metrics
 # model.initialize(model='l2',colorspace='Lab')

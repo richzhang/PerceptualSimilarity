@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.interpolation import zoom
 from skimage.measure import compare_ssim
 import torch
-import progressbar
 from IPython import embed
 import cv2
 from datetime import datetime

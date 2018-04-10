@@ -35,7 +35,10 @@ class DistModel(BaseModel):
         self.model_name = '%s [%s]'%(model,net)
         if(self.model == 'net-lin'): # pretrained net + linear layer
             self.net = networks.PNetLin(use_gpu=use_gpu,pnet_type=net,use_dropout=True)
-            self.net.load_state_dict(torch.load('./weights/%s.pth'%net))
+            kw = {}
+            if not use_gpu:
+                kw['map_location'] = 'cpu'
+            self.net.load_state_dict(torch.load('./weights/%s.pth'%net, **kw))
         elif(self.model=='net'): # pretrained network
             self.net = networks.PNet(use_gpu=use_gpu,pnet_type=net)
             self.is_fake_net = True
