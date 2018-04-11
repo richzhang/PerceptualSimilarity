@@ -11,15 +11,13 @@ from . import networks_basic as networks
 from scipy.ndimage import zoom
 import fractions
 import functools
-
-def lcm(a, b):
-    return a*b//fractions.gcd(a, b)
+import skimage.transform
 
 class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False, spatial=False):
+    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=5):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -30,6 +28,10 @@ class DistModel(BaseModel):
             colorspace - ['Lab','RGB'] colorspace to use for L2 and SSIM
             use_gpu - bool - whether or not to use a GPU
             printNet - bool - whether or not to print network architecture out
+            spatial - bool - whether to output an array containing varying distances across spatial dimensions
+            spatial_shape - if given, output spatial shape. if None then spatial shape is determined automatically via spatial_factor (see below).
+            spatial_factor - if given, specifies upsampling factor relative to the largest spatial extent of a convolutional layer.
+            spatial_order - spline order of filter for upsampling in spatial mode, by default 1 (bilinear).
         '''
         BaseModel.initialize(self, use_gpu=use_gpu)
 
@@ -37,6 +39,9 @@ class DistModel(BaseModel):
         self.net = net
         self.use_gpu = use_gpu
         self.spatial = spatial
+        self.spatial_shape = spatial_shape
+        self.spatial_order = spatial_order
+        self.spatial_factor = spatial_factor
 
         self.model_name = '%s [%s]'%(model,net)
         if(self.model == 'net-lin'): # pretrained net + linear layer
@@ -46,6 +51,7 @@ class DistModel(BaseModel):
                 kw['map_location'] = 'cpu'
             self.net.load_state_dict(torch.load('./weights/%s.pth'%net, **kw))
         elif(self.model=='net'): # pretrained network
+            assert not self.spatial, 'spatial argument not supported yet for uncalibrated networks'
             self.net = networks.PNet(use_gpu=use_gpu,pnet_type=net)
             self.is_fake_net = True
         elif(self.model in ['L2','l2']):
@@ -107,9 +113,12 @@ class DistModel(BaseModel):
 
         if self.spatial:
             L = [convert_output(x) for x in self.d0]
-            height = functools.reduce(lcm, [x.shape[0] for x in L])
-            width  = functools.reduce(lcm, [x.shape[1] for x in L])
-            L = [np.repeat(np.repeat(x, height//x.shape[0], 0), width//x.shape[1], 1) for x in L]
+            spatial_shape = self.spatial_shape
+            if spatial_shape is None:
+                spatial_shape = (max([x.shape[0] for x in L])*self.spatial_factor, max([x.shape[1] for x in L])*self.spatial_factor)
+            
+            L = [skimage.transform.resize(x, spatial_shape, order=self.spatial_order, mode='edge') for x in L]
+            
             L = np.mean(np.concatenate(L, 2) * len(L), 2)
             return L
         else:

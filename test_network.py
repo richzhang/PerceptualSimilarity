@@ -3,10 +3,10 @@ import torch
 from util import util
 from models import dist_model as dm
 from IPython import embed
-import numpy
 
-use_gpu = True          # Whether to use GPU
-spatial = False         # Whether to return a spatial map of distance of size height x width
+use_gpu = False         # Whether to use GPU
+spatial = False         # Return a spatial map of perceptual distance.
+                        # Optional args spatial_shape and spatial_order control output shape and resampling filter: see DistModel.initialize() for details.
 
 ## Initializing the model
 model = dm.DistModel()
@@ -38,12 +38,11 @@ ex_p1 = util.im2tensor(util.load_image('./imgs/ex_p1.png'))
 ex_d0 = model.forward(ex_ref,ex_p0)
 ex_d1 = model.forward(ex_ref,ex_p1)
 if not spatial:
-    print('Distances: (%.6f, %.6f)'%(ex_d0, ex_d1))
+    print('Distances: (%.3f, %.3f)'%(ex_d0, ex_d1))
 else:
-    print('Distances: (%.6f, %.6f)'%(ex_d0.mean(),ex_d1.mean()))            # The mean distance is the same as the non-spatial distance
+    print('Distances: (%.3f, %.3f)'%(ex_d0.mean(),ex_d1.mean()))            # The mean distance is approximately the same as the non-spatial distance
     
-    # Visualize a spatially-varying distance map
+    # Visualize a spatially-varying distance map between ex_p0 and ex_ref
     import pylab
     pylab.imshow(ex_d0)
     pylab.show()
-
