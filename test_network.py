@@ -5,7 +5,7 @@ from models import dist_model as dm
 from IPython import embed
 
 use_gpu = True         # Whether to use GPU
-spatial = True         # Return a spatial map of perceptual distance.
+spatial = False         # Return a spatial map of perceptual distance.
                        # Optional args spatial_shape and spatial_order control output shape and resampling filter: see DistModel.initialize() for details.
 
 ## Initializing the model

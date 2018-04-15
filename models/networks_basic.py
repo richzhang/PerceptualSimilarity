@@ -7,7 +7,7 @@ from pdb import set_trace as st
 from util import util
 from skimage import color
 from IPython import embed
-import pretrained_networks as pn
+from . import pretrained_networks as pn
 
 # Off-the-shelf deep network
 class PNet(nn.Module):
