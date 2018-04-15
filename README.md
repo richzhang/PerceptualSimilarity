@@ -41,7 +41,7 @@ where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patch
 
 ### Backpropping through the metric
 
-File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to use VGG loss (without our learned weights).
+File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights. This was implemented by [Angjoo Kanazawa](https://github.com/akanazawa).
 
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
