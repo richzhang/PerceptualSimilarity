@@ -5,7 +5,7 @@ This repository contains the **(1) Learned Perceptual Image Patch Similarity (LP
 
 **The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric**  
 [Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/).  
-In CVPR, 2018 ([paper](https://arxiv.org/abs/1801.03924)).  
+In [CVPR](https://arxiv.org/abs/1801.03924), 2018.  
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
