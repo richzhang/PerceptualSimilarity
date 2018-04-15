@@ -39,6 +39,10 @@ d = model.forward(im0,im1)
 
 where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). Variable `d` will be a length `N` numpy array.
 
+### Backpropping through the metric
+
+File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to use VGG loss (without our learned weights).
+
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
 ### Downloading the dataset
