@@ -17,7 +17,7 @@ class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=5):
+    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -30,7 +30,7 @@ class DistModel(BaseModel):
             printNet - bool - whether or not to print network architecture out
             spatial - bool - whether to output an array containing varying distances across spatial dimensions
             spatial_shape - if given, output spatial shape. if None then spatial shape is determined automatically via spatial_factor (see below).
-            spatial_factor - if given, specifies upsampling factor relative to the largest spatial extent of a convolutional layer.
+            spatial_factor - if given, specifies upsampling factor relative to the largest spatial extent of a convolutional layer. if None then resized to size of input images.
             spatial_order - spline order of filter for upsampling in spatial mode, by default 1 (bilinear).
         '''
         BaseModel.initialize(self, use_gpu=use_gpu)
@@ -115,7 +115,10 @@ class DistModel(BaseModel):
             L = [convert_output(x) for x in self.d0]
             spatial_shape = self.spatial_shape
             if spatial_shape is None:
-                spatial_shape = (max([x.shape[0] for x in L])*self.spatial_factor, max([x.shape[1] for x in L])*self.spatial_factor)
+                if(self.spatial_factor is None):
+                    spatial_shape = (in0.size()[2],in0.size()[3])
+                else:
+                    spatial_shape = (max([x.shape[0] for x in L])*self.spatial_factor, max([x.shape[1] for x in L])*self.spatial_factor)
             
             L = [skimage.transform.resize(x, spatial_shape, order=self.spatial_order, mode='edge') for x in L]
             
