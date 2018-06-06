@@ -15,11 +15,11 @@ This repository uses Python 2 or 3, with the following libraries: [PyTorch](www.
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
 
-### About the metric
+### (A) About the metric
 
 We found that deep network activations work surprisingly well as a perceptual similarity metric. This was true across network architectures (SqueezeNet [2.8 MB], AlexNet [9.1 MB], and VGG [58.9 MB] provided similar scores) and supervisory signals (unsupervised, self-supervised, and supervised all perform strongly). We slightly improved scores by linearly "calibrating" networks - adding a linear layer on top of off-the-shelf classification networks. We provide 3 variants, using linear layers on top of the SqueezeNet, AlexNet (default), and VGG networks. Using this code, you can simply call `model.forward(im0,im1)` to evaluate the distance between two image patches.
 
-### Using the metric
+### (B) Using the metric
 
 Script [`test_network.py`](test_network.py) contains example usage. Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer? A more detailed explanation is below.
 
@@ -39,13 +39,13 @@ d = model.forward(im0,im1)
 
 where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). Variable `d` will be a length `N` numpy array.
 
-### Backpropping through the metric
+### (C) Backpropping through the metric
 
 File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights. This was implemented by [Angjoo Kanazawa](https://github.com/akanazawa).
 
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
-### Downloading the dataset
+### (A) Downloading the dataset
 
 Run `bash ./scripts/get_dataset.sh` to download and unzip the dataset. Dataset will appear in directory `./dataset`. Dataset takes [6.6 GB] total.
 - 2AFC train [5.3 GB]
@@ -53,7 +53,7 @@ Run `bash ./scripts/get_dataset.sh` to download and unzip the dataset. Dataset w
 - JND val [0.2 GB]  
 Alternatively, run `bash ./scripts/get_dataset_valonly.sh` to only download the validation set (no training set).
 
-### Evaluating a perceptual similarity metric on a dataset
+### (B) Evaluating a perceptual similarity metric on a dataset
 
 Script `test_dataset_model.py` evaluates a perceptual model on a subset of the dataset.
 
@@ -78,7 +78,7 @@ Script `test_dataset_model.py` evaluates a perceptual model on a subset of the d
 
 An example usage is as follows: `python ./test_dataset_model.py --dataset_mode 2afc --datasets val/traditional val/cnn --model net-lin --net alex --use_gpu --batch_size 50`. This would evaluate our model on the "traditional" and "cnn" validation datasets.
 
-### About the dataset
+### (C) About the dataset
 
 The dataset contains two types of perceptual judgements: **Two Alternative Forced Choice (2AFC)** and **Just Noticeable Differences (JND)**.
 
