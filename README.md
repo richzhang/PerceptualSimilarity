@@ -112,6 +112,10 @@ Each JND subdirectory contains the following folders:
 - `p0,p1` contain the two patches
 - `same` contains fraction of human evaluators who thought the patches were the same (0 if all humans thought patches were different, 1 if all humans thought patches were the same)
 
+### (D) Using the dataset to train the metric
+
+See script `train_test_metric.sh` for an example of training and testing the metric. The code supports training a linear layer on top of an existing representation. Training will add a subdirectory in the `checkpoints` directory.
+
 ## Citation
 
 If you find this repository useful for your research, please use the following.

@@ -12,12 +12,13 @@ from scipy.ndimage import zoom
 import fractions
 import functools
 import skimage.transform
+from IPython import embed
 
 class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='squeeze', colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None):
+    def initialize(self, model='net-lin', net='alex', model_path=None, colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None, is_train=False, lr=.0001, beta1=0.5):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -25,6 +26,7 @@ class DistModel(BaseModel):
                     ['L2'] for L2 distance in Lab colorspace
                     ['SSIM'] for ssim in RGB colorspace
             net - ['squeeze','alex','vgg']
+            model_path - if None, will look in weights/[NET_NAME].pth
             colorspace - ['Lab','RGB'] colorspace to use for L2 and SSIM
             use_gpu - bool - whether or not to use a GPU
             printNet - bool - whether or not to print network architecture out
@@ -32,12 +34,16 @@ class DistModel(BaseModel):
             spatial_shape - if given, output spatial shape. if None then spatial shape is determined automatically via spatial_factor (see below).
             spatial_factor - if given, specifies upsampling factor relative to the largest spatial extent of a convolutional layer. if None then resized to size of input images.
             spatial_order - spline order of filter for upsampling in spatial mode, by default 1 (bilinear).
+            is_train - bool - [True] for training mode
+            lr - float - initial learning rate
+            beta1 - float - initial momentum term for adam
         '''
         BaseModel.initialize(self, use_gpu=use_gpu)
 
         self.model = model
         self.net = net
         self.use_gpu = use_gpu
+        self.is_train = is_train
         self.spatial = spatial
         self.spatial_shape = spatial_shape
         self.spatial_order = spatial_order
@@ -49,7 +55,10 @@ class DistModel(BaseModel):
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
-            self.net.load_state_dict(torch.load('./weights/%s.pth'%net, **kw))
+            if(model_path is None):
+                model_path = './weights/%s.pth'%net
+            self.net.load_state_dict(torch.load(model_path, **kw))
+
         elif(self.model=='net'): # pretrained network
             assert not self.spatial, 'spatial argument not supported yet for uncalibrated networks'
             self.net = networks.PNet(use_gpu=use_gpu,pnet_type=net)
@@ -64,7 +73,16 @@ class DistModel(BaseModel):
             raise ValueError("Model [%s] not recognized." % self.model)
 
         self.parameters = list(self.net.parameters())
-        self.net.eval()
+
+        if self.is_train: # training mode
+            # extra network on top to go from distances (d0,d1) => predicted human judgment (h*)
+            self.rankLoss = networks.BCERankingLoss(use_gpu=use_gpu)
+            self.parameters+=self.rankLoss.parameters
+            self.lr = lr
+            self.old_lr = lr
+            self.optimizer_net = torch.optim.Adam(self.parameters, lr=lr, betas=(beta1, 0.999))
+        else: # test mode
+            self.net.eval()
 
         if(printNet):
             print('---------- Networks initialized -------------')
@@ -126,6 +144,94 @@ class DistModel(BaseModel):
             return L
         else:
             return convert_output(self.d0)
+
+    # ***** TRAINING FUNCTIONS *****
+    def optimize_parameters(self):
+        self.forward_train()
+        self.optimizer_net.zero_grad()
+        self.backward_train()
+        self.optimizer_net.step()
+        self.clamp_weights()
+
+    def clamp_weights(self):
+        for module in self.net.modules():
+            if(hasattr(module, 'weight') and module.kernel_size==(1,1)):
+                module.weight.data = torch.clamp(module.weight.data,min=0)
+
+    def set_input(self, data):
+        self.input_ref = data['ref']
+        self.input_p0 = data['p0']
+        self.input_p1 = data['p1']
+        self.input_judge = data['judge']
+
+        if(self.use_gpu):
+            self.input_ref = self.input_ref.cuda()
+            self.input_p0 = self.input_p0.cuda()
+            self.input_p1 = self.input_p1.cuda()
+            self.input_judge = self.input_judge.cuda()
+
+        self.var_ref = Variable(self.input_ref,requires_grad=True)
+        self.var_p0 = Variable(self.input_p0,requires_grad=True)
+        self.var_p1 = Variable(self.input_p1,requires_grad=True)
+
+    def forward_train(self): # run forward pass
+        self.d0 = self.forward_pair(self.var_ref, self.var_p0)
+        self.d1 = self.forward_pair(self.var_ref, self.var_p1)
+        self.acc_r = self.compute_accuracy(self.d0,self.d1,self.input_judge)
+
+        # var_judge
+        self.var_judge = Variable(1.*self.input_judge).view(self.d0.size())
+
+        self.loss_total = self.rankLoss.forward(self.d0, self.d1, self.var_judge*2.-1.)
+        return self.loss_total
+
+    def backward_train(self):
+        torch.mean(self.loss_total).backward()
+
+    def compute_accuracy(self,d0,d1,judge):
+        ''' d0, d1 are Variables, judge is a Tensor '''
+        d1_lt_d0 = (d1<d0).cpu().data.numpy().flatten()
+        judge_per = judge.cpu().numpy().flatten()
+        return d1_lt_d0*judge_per + (1-d1_lt_d0)*(1-judge_per)
+
+    def get_current_errors(self):
+        retDict = OrderedDict([('loss_total', self.loss_total.data.cpu().numpy()),
+                            ('acc_r', self.acc_r)])
+
+        for key in retDict.keys():
+            retDict[key] = np.mean(retDict[key])
+
+        return retDict
+
+    def get_current_visuals(self):
+        zoom_factor = 256/self.var_ref.data.size()[2]
+
+        ref_img = util.tensor2im(self.var_ref.data)
+        p0_img = util.tensor2im(self.var_p0.data)
+        p1_img = util.tensor2im(self.var_p1.data)
+
+        ref_img_vis = zoom(ref_img,[zoom_factor, zoom_factor, 1],order=0)
+        p0_img_vis = zoom(p0_img,[zoom_factor, zoom_factor, 1],order=0)
+        p1_img_vis = zoom(p1_img,[zoom_factor, zoom_factor, 1],order=0)
+
+        return OrderedDict([('ref', ref_img_vis),
+                            ('p0', p0_img_vis),
+                            ('p1', p1_img_vis)])
+
+    def save(self, path, label):
+        self.save_network(self.net, path, '', label)
+        self.save_network(self.rankLoss.net, path, 'rank', label)
+
+    def update_learning_rate(self,nepoch_decay):
+        lrd = self.lr / nepoch_decay
+        lr = self.old_lr - lrd
+
+        for param_group in self.optimizer_net.param_groups:
+            param_group['lr'] = lr
+
+        print('update lr [%s] decay: %f -> %f' % (type,self.old_lr, lr))
+        self.old_lr = lr
+
 
 
 def score_2afc_dataset(data_loader,func):

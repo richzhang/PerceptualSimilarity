@@ -1,13 +1,12 @@
 import numpy as np
 import os
-import ntpath
 import time
 from . import util
 from . import html
-from pdb import set_trace as st
+# from pdb import set_trace as st
 import matplotlib.pyplot as plt
 import math
-from IPython import embed
+# from IPython import embed
 
 def zoom_to_res(img,res=256,order=0,axis=0):
     # img   3xXxX
@@ -22,20 +21,23 @@ class Visualizer():
     def __init__(self, opt):
         # self.opt = opt
         self.display_id = opt.display_id
-        self.use_html = opt.isTrain and not opt.no_html
+        # self.use_html = opt.is_train and not opt.no_html
         self.win_size = opt.display_winsize
         self.name = opt.name
         self.display_cnt = 0 # display_current_results counter
         self.display_cnt_high = 0
+        self.use_html = opt.use_html
+
         if self.display_id > 0:
             import visdom
             self.vis = visdom.Visdom(port = opt.display_port)
 
+        self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, 'web')
+        util.mkdirs([self.web_dir,])
         if self.use_html:
-            self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, 'web')
             self.img_dir = os.path.join(self.web_dir, 'images')
             print('create web directory %s...' % self.web_dir)
-            util.mkdirs([self.web_dir, self.img_dir])
+            util.mkdirs([self.img_dir,])
 
     # |visuals|: dictionary of images to display or save
     def display_current_results(self, visuals, epoch, nrows=None, res=256):
@@ -111,6 +113,7 @@ class Visualizer():
                 ax.plot(x, y, 'o-', label=kname)
             np.save(os.path.join(self.web_dir,'%s_x')%kname,x)
             np.save(os.path.join(self.web_dir,'%s_y')%kname,y)
+
         if(to_plot):
             plt.legend(loc=0,fontsize='small')
             plt.xlabel('epoch')

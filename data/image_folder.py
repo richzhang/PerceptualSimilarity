@@ -24,15 +24,18 @@ def is_image_file(filename, mode='img'):
     elif(mode=='np'):
         return any(filename.endswith(extension) for extension in NP_EXTENSIONS)
 
-def make_dataset(dir, mode='img'):
-    images = []
-    assert os.path.isdir(dir), '%s is not a valid directory' % dir
+def make_dataset(dirs, mode='img'):
+    if(not isinstance(dirs,list)):
+        dirs = [dirs,]
 
-    for root, _, fnames in sorted(os.walk(dir)):
-        for fname in fnames:
-            if is_image_file(fname, mode=mode):
-                path = os.path.join(root, fname)
-                images.append(path)
+    images = []
+    for dir in dirs:
+        assert os.path.isdir(dir), '%s is not a valid directory' % dir
+        for root, _, fnames in sorted(os.walk(dir)):
+            for fname in fnames:
+                if is_image_file(fname, mode=mode):
+                    path = os.path.join(root, fname)
+                    images.append(path)
 
     # print("Found %i images in %s"%(len(images),root))
     return images

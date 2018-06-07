@@ -5,22 +5,25 @@ from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
 import torch
+# from IPython import embed
 
 class TwoAFCDataset(BaseDataset):
-    def initialize(self, dataroot, load_size=64):
-        self.root = dataroot
+    def initialize(self, dataroots, load_size=64):
+        if(not isinstance(dataroots,list)):
+            dataroots = [dataroots,]
+        self.roots = dataroots
         self.load_size = load_size
 
         # image directory
-        self.dir_ref = os.path.join(self.root, 'ref')
+        self.dir_ref = [os.path.join(root, 'ref') for root in self.roots]
         self.ref_paths = make_dataset(self.dir_ref)
         self.ref_paths = sorted(self.ref_paths)
 
-        self.dir_p0 = os.path.join(self.root, 'p0')
+        self.dir_p0 = [os.path.join(root, 'p0') for root in self.roots]
         self.p0_paths = make_dataset(self.dir_p0)
         self.p0_paths = sorted(self.p0_paths)
 
-        self.dir_p1 = os.path.join(self.root, 'p1')
+        self.dir_p1 = [os.path.join(root, 'p1') for root in self.roots]
         self.p1_paths = make_dataset(self.dir_p1)
         self.p1_paths = sorted(self.p1_paths)
 
@@ -32,7 +35,7 @@ class TwoAFCDataset(BaseDataset):
         self.transform = transforms.Compose(transform_list)
 
         # judgement directory
-        self.dir_J = os.path.join(self.root, 'judge')
+        self.dir_J = [os.path.join(root, 'judge') for root in self.roots]
         self.judge_paths = make_dataset(self.dir_J,mode='np')
         self.judge_paths = sorted(self.judge_paths)
 

@@ -174,6 +174,24 @@ class Dist2LogitLayer(nn.Module):
     def forward(self,d0,d1,eps=0.1):
         return self.model.forward(torch.cat((d0,d1,d0-d1,d0/(d1+eps),d1/(d0+eps)),dim=1))
 
+class BCERankingLoss(nn.Module):
+    def __init__(self, use_gpu=True, chn_mid=32):
+        super(BCERankingLoss, self).__init__()
+        self.use_gpu = use_gpu
+        self.net = Dist2LogitLayer(chn_mid=chn_mid)
+        self.parameters = list(self.net.parameters())
+        self.loss = torch.nn.BCELoss()
+        self.model = nn.Sequential(*[self.net])
+
+        if(self.use_gpu):
+            self.net.cuda()
+
+    def forward(self, d0, d1, judge):
+        per = (judge+1.)/2.
+        if(self.use_gpu):
+            per = per.cuda()
+        self.logit = self.net.forward(d0,d1)
+        return self.loss(self.logit, per)
 
 class NetLinLayer(nn.Module):
     ''' A single linear layer which does a 1x1 conv '''
