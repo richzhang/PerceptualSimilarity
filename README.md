@@ -114,7 +114,9 @@ Each JND subdirectory contains the following folders:
 
 ### (D) Using the dataset to train the metric
 
-See script `train_test_metric.sh` for an example of training and testing the metric. The code supports training a linear layer on top of an existing representation. Training will add a subdirectory in the `checkpoints` directory.
+See script `train_test_metric.sh` for an example of training and testing the metric. The script will train a model on the full training set for 10 epochs, and then test the learned metric on all of the validation sets. The numbers should roughly match the **Alex - lin** row in Table 5 in the [paper](https://arxiv.org/abs/1801.03924).
+
+The code supports training a linear layer on top of an existing representation. Training will add a subdirectory in the `checkpoints` directory.
 
 ## Citation
 
