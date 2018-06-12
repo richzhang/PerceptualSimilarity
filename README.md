@@ -21,7 +21,7 @@ Using this code, you can simply call `model.forward(im0,im1)` to evaluate the di
 
 Run `python ./compute_dists.py --path0 ./imgs/ex_ref.png --path1 ./imgs/ex_p0.png --use_gpu` to compute the distance between two images.
 
-Run `python ./compute_dists.py --dir0 ./imgs/ex_dir0 --dir1 ./imgs/exdir1 --out ./imgs/example_dists.txt --out ./imgs/out.txt --use_gpu` to compute the distances between pairs of images across two directories.
+Run `python ./compute_dists_dirs.py --dir0 ./imgs/ex_dir0 --dir1 ./imgs/exdir1 --out ./imgs/example_dists.txt --use_gpu` to compute the distances between pairs of images across two directories.
 
 ### (A.II) Using the LPIPS metric [longer version]
 
