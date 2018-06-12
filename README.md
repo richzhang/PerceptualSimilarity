@@ -15,11 +15,15 @@ This repository uses Python 2 or 3, with the following libraries: [PyTorch](www.
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
 
-### (A) About the metric
+Using this code, you can simply call `model.forward(im0,im1)` to evaluate the distance between two image patches.
 
-We found that deep network activations work surprisingly well as a perceptual similarity metric. This was true across network architectures (SqueezeNet [2.8 MB], AlexNet [9.1 MB], and VGG [58.9 MB] provided similar scores) and supervisory signals (unsupervised, self-supervised, and supervised all perform strongly). We slightly improved scores by linearly "calibrating" networks - adding a linear layer on top of off-the-shelf classification networks. We provide 3 variants, using linear layers on top of the SqueezeNet, AlexNet (default), and VGG networks. Using this code, you can simply call `model.forward(im0,im1)` to evaluate the distance between two image patches.
+### (A.I) Using the LPIPS metric [shorter version]
 
-### (B) Using the metric
+Run `python ./compute_dists.py --path0 ./imgs/ex_ref.png --path1 ./imgs/ex_p0.png --use_gpu` to compute the distance between two images.
+
+Run `python ./compute_dists.py --dir0 ./imgs/ex_dir0 --dir1 ./imgs/exdir1 --out ./imgs/example_dists.txt --out ./imgs/out.txt --use_gpu` to compute the distances between pairs of images across two directories.
+
+### (A.II) Using the LPIPS metric [longer version]
 
 Script [`test_network.py`](test_network.py) contains example usage. Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](./imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](./imgs/ex_p1.png). Before running it - which do you think *should* be closer? A more detailed explanation is below.
 
@@ -39,9 +43,13 @@ d = model.forward(im0,im1)
 
 where ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). Variable `d` will be a length `N` numpy array.
 
-### (C) Backpropping through the metric
+### (B) Backpropping through the metric
 
 File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights. This was implemented by [Angjoo Kanazawa](https://github.com/akanazawa).
+
+### (C) About the metric
+
+We found that deep network activations work surprisingly well as a perceptual similarity metric. This was true across network architectures (SqueezeNet [2.8 MB], AlexNet [9.1 MB], and VGG [58.9 MB] provided similar scores) and supervisory signals (unsupervised, self-supervised, and supervised all perform strongly). We slightly improved scores by linearly "calibrating" networks - adding a linear layer on top of off-the-shelf classification networks. We provide 3 variants, using linear layers on top of the SqueezeNet, AlexNet (default), and VGG networks.
 
 ## (2) Berkeley Adobe Perceptual Patch Similarity (BAPPS) dataset
 
