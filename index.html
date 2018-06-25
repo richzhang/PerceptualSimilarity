@@ -78,6 +78,13 @@
 		margin-right: 45px;
 	}
 
+	.paper-big { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
+		box-shadow:
+		        0px 0px 1px 1px rgba(0,0,0,0.35); /* The top layer shadow */
+
+		margin-left: 10px;
+		margin-right: 45px;
+	}
 
 	.layered-paper { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
 		box-shadow:
@@ -188,7 +195,7 @@
 		  		  	  </td>
 	  	              <td align=center width=225px>
 	  					<center>
-	  						<span style="font-size:22px">CVPR 2018<a href="http://arxiv.org/abs/1801.03924"> [preprint]</a></span>
+	  						<span style="font-size:22px">CVPR 2018<a href="http://arxiv.org/abs/1801.03924"> [Paper]</a></span>
 		  		  		</center>
 		  		  	  </td>
 	  	              <td align=center width=275px>
@@ -217,7 +224,7 @@
 	  		 	<center><h1>Abstract</h1></center>
 	  		 	<tr>
 		            <!-- <td align=center width=600px> -->
-					While it is nearly effortless for humans to quickly assess the perceptual similarity between two images, the  underlying processes are thought to be quite complex. Despite this, the most widely used perceptual metrics today, such as PSNR and SSIM, are simple, shallow functions, and fail to account for many nuances of human perception. Recently, the deep learning community has found that features of the VGG network trained on ImageNet classification has been remarkably useful as a training loss for image synthesis. But how perceptual are these so-called ``perceptual losses"? What elements are critical for their success? To answer these questions, we introduce a new dataset of human perceptual similarity judgments. We systematically evaluate deep features across different architectures and tasks and compare them with classic metrics. We find that deep features outperform all previous metrics by large margins on our dataset. More surprisingly, this result is not restricted to ImageNet-trained VGG features, but holds across different deep architectures and levels of supervision (supervised, self-supervised, or even unsupervised). Our results suggest that perceptual similarity is an emergent property shared across deep visual representations.
+					While it is nearly effortless for humans to quickly assess the perceptual similarity between two images, the  underlying processes are thought to be quite complex. Despite this, the most widely used perceptual metrics today, such as PSNR and SSIM, are simple, shallow functions, and fail to account for many nuances of human perception. Recently, the deep learning community has found that features of the VGG network trained on ImageNet classification has been remarkably useful as a training loss for image synthesis. But how perceptual are these so-called "perceptual losses"? What elements are critical for their success? To answer these questions, we introduce a new dataset of human perceptual similarity judgments. We systematically evaluate deep features across different architectures and tasks and compare them with classic metrics. We find that deep features outperform all previous metrics by large margins on our dataset. More surprisingly, this result is not restricted to ImageNet-trained VGG features, but holds across different deep architectures and levels of supervision (supervised, self-supervised, or even unsupervised). Our results suggest that perceptual similarity is an emergent property shared across deep visual representations.
 					<!-- </td> -->
   		  <br>
 				</tr>
@@ -255,9 +262,19 @@
 				  <td><a href="http://arxiv.org/abs/1801.03924"><img class="layered-paper-big" style="height:175px" src="./index_files/page1.png"/></a></td>
 				  <td><span style="font-size:12pt">R. Zhang, P. Isola, A. A. Efros, <br>E. Shechtman, O. Wang.</span><br>
 				  <b><span style="font-size:12pt">The Unreasonable Effectiveness of <br>Deep Features as a Perceptual Metric.</b></span><br>
-				  <span style="font-size:12pt">In CVPR, 2018 (<a href="http://arxiv.org/abs/1801.03924">preprint</a>).</span>
+				  <span style="font-size:12pt">In CVPR, 2018 <a href="http://arxiv.org/abs/1801.03924">[ArXiv (preferred)]</a> <a href="http://openaccess.thecvf.com/content_cvpr_2018/html/Zhang_The_Unreasonable_Effectiveness_CVPR_2018_paper.html">[CVF]</a></span>.
 				  </td>
   	              </td>
+              </tr>
+  		  </table>
+		  <br><br>
+
+		  <hr>
+
+  		  <table align=center width=200 px>
+	 		<center><h1>Poster</h1></center>
+  			  <tr>
+				  <td><a href="./index_files/poster_cvpr.pdf"><img class="paper-big" style="width:600px" src="./index_files/poster_teaser.png"/></a></td>
               </tr>
   		  </table>
 		  <br>
@@ -265,7 +282,7 @@
 		  <table align=center width=600px>
 			  <tr>
 				  <td><span style="font-size:24pt"><center>
-				  	<a href="./index_files/bibtex_cvpr2018.txt">[Bibtex]</a>
+				  	<a href="./index_files/poster_cvpr.pdf">[PDF]</a>
   	              </center></td>
               </tr>
   		  </table>
