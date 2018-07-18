@@ -1,3 +1,8 @@
 *.pyc
 
 checkpoints/*
+
+# Packages
+/*.egg-info
+/dist
+/build
