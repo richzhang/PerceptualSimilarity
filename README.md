@@ -3,7 +3,7 @@
 
 This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset** proposed in the paper below. It can also be used as an implementation of the "perceptual loss".
 
-**The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric**  
+**The Unreasonable Effectiveness of Deep Features as a Perceptual Metric**  
 [Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/).  
 In [CVPR](https://arxiv.org/abs/1801.03924), 2018.  
 
@@ -137,7 +137,7 @@ If you find this repository useful for your research, please use the following.
 
 ```
 @inproceedings{zhang2018perceptual,
-  title={The Unreasonable Effectiveness of Deep Networks as a Perceptual Metric},
+  title={The Unreasonable Effectiveness of Deep Features as a Perceptual Metric},
   author={Zhang, Richard and Isola, Phillip and Efros, Alexei A and Shechtman, Eli and Wang, Oliver},
   booktitle={CVPR},
   year={2018}
