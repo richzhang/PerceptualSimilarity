@@ -18,7 +18,7 @@ class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='alex', model_path=None, colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None, is_train=False, lr=.0001, beta1=0.5):
+    def initialize(self, model='net-lin', net='alex', pnet_rand=False, pnet_tune=False, model_path=None, colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None, is_train=False, lr=.0001, beta1=0.5, version='0.1'):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -37,6 +37,7 @@ class DistModel(BaseModel):
             is_train - bool - [True] for training mode
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
+            version - 0.1 for latest, 0.0 was original
         '''
         BaseModel.initialize(self, use_gpu=use_gpu)
 
@@ -51,13 +52,16 @@ class DistModel(BaseModel):
 
         self.model_name = '%s [%s]'%(model,net)
         if(self.model == 'net-lin'): # pretrained net + linear layer
-            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_type=net,use_dropout=True,spatial=spatial)
+            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,use_dropout=True,spatial=spatial,version=version)
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
             if(model_path is None):
-                model_path = './weights/%s.pth'%net
-            self.net.load_state_dict(torch.load(model_path, **kw))
+                model_path = './weights/v%s/%s.pth'%(version,net)
+
+            if(not is_train):
+                print('Loading model from: %s'%model_path)
+                self.net.load_state_dict(torch.load(model_path, **kw))
 
         elif(self.model=='net'): # pretrained network
             assert not self.spatial, 'spatial argument not supported yet for uncalibrated networks'

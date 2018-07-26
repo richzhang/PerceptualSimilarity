@@ -65,13 +65,15 @@ class PNet(nn.Module):
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_tune=False, use_dropout=False, use_gpu=True, spatial=True):
+    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, use_gpu=True, spatial=False, version='0.1'):
         super(PNetLin, self).__init__()
 
         self.use_gpu = use_gpu
         self.pnet_type = pnet_type
         self.pnet_tune = pnet_tune
+        self.pnet_rand = pnet_rand
         self.spatial = spatial
+        self.version = version
 
         if(self.pnet_type in ['vgg','vgg16']):
             net_type = pn.vgg16
@@ -84,9 +86,9 @@ class PNetLin(nn.Module):
             self.chns = [64,128,256,384,384,512,512]
 
         if(self.pnet_tune):
-            self.net = net_type(requires_grad=True)
+            self.net = net_type(pretrained=not self.pnet_rand,requires_grad=True)
         else:
-            self.net = [net_type(requires_grad=False),]
+            self.net = [net_type(pretrained=not self.pnet_rand,requires_grad=False),]
 
         self.lin0 = NetLinLayer(self.chns[0],use_dropout=use_dropout)
         self.lin1 = NetLinLayer(self.chns[1],use_dropout=use_dropout)
@@ -122,12 +124,21 @@ class PNetLin(nn.Module):
         in0_sc = (in0 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
         in1_sc = (in1 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
 
-        if(self.pnet_tune):
-            outs0 = self.net.forward(in0)
-            outs1 = self.net.forward(in1)
+        if(self.version=='0.0'):
+            # v0.0 - original release had a bug, where input was not scaled
+            in0_input = in0
+            in1_input = in1
         else:
-            outs0 = self.net[0].forward(in0)
-            outs1 = self.net[0].forward(in1)
+            # v0.1
+            in0_input = in0_sc
+            in1_input = in1_sc
+
+        if(self.pnet_tune):
+            outs0 = self.net.forward(in0_input)
+            outs1 = self.net.forward(in1_input)
+        else:
+            outs0 = self.net[0].forward(in0_input)
+            outs1 = self.net[0].forward(in1_input)
 
         feats0 = {}
         feats1 = {}
