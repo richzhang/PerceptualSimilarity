@@ -131,6 +131,10 @@ See script `train_test_metric.sh` for an example of training and testing the met
 
 You can also train "scratch" and "tune" versions by running `train_test_metric_scratch.sh` and `train_test_metric_tune.sh`, respectively. 
 
+### Docker Environment
+
+[Docker](https://hub.docker.com/r/shinyeyes/perceptualsimilarity/) set up by [SuperShinyEyes](https://github.com/SuperShinyEyes).
+
 ## Citation
 
 If you find this repository useful for your research, please use the following.
