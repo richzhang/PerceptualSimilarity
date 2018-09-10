@@ -9,9 +9,19 @@ In [CVPR](https://arxiv.org/abs/1801.03924), 2018.
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
-## (0) Dependencies
+## (0) Dependencies/Setup
 
-This repository uses Python 2 or 3, with the following libraries: [PyTorch](www.pytorch.org), numpy, scipy, skimage.
+### Installation
+- Install PyTorch 0.4+ and torchvision fom http://pytorch.org
+
+```bash
+pip install -r requirements.txt
+```
+- Clone this repo:
+```bash
+git clone https://github.com/richzhang/PerceptualSimilarity
+cd PerceptualSimilarity
+```
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
 
