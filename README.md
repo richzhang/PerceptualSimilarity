@@ -21,7 +21,7 @@ Using this code, you can simply call `model.forward(im0,im1)` to evaluate the di
 
 Computing the distance between two images: `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu`
 
-Computing the distance between pairs of images within two directories: `python ./compute_dists_dirs.py --dir0 ./imgs/ex_dir0 --dir1 ./imgs/exdir1 --out ./imgs/example_dists.txt --use_gpu`
+Computing the distance between pairs of images within two directories: `python ./compute_dists_dirs.py --dir0 ./imgs/ex_dir0 --dir1 ./imgs/ex_dir1 --out ./imgs/example_dists.txt --use_gpu`
 
 ### (A.II) Using the LPIPS metric [longer version]
 
@@ -60,7 +60,7 @@ We found that deep network activations work surprisingly well as a perceptual si
 
 ### (A) Downloading the dataset
 
-Run `bash ./scripts/get_dataset.sh` to download and unzip the dataset. Dataset will appear in directory `./dataset`. Dataset takes [6.6 GB] total.
+Run `bash ./scripts/download_dataset.sh` to download and unzip the dataset. Dataset will appear in directory `./dataset`. Dataset takes [6.6 GB] total.
 - 2AFC train [5.3 GB]
 - 2AFC val [1.1 GB]
 - JND val [0.2 GB]  

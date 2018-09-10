@@ -1,3 +1,9 @@
+
+from __future__ import absolute_import
+
+import sys
+sys.path.append('..')
+sys.path.append('.')
 import numpy as np
 import torch
 from torch import nn
@@ -5,14 +11,15 @@ import os
 from collections import OrderedDict
 from torch.autograd import Variable
 import itertools
-import util.util as util
 from .base_model import BaseModel
-from . import networks_basic as networks
 from scipy.ndimage import zoom
 import fractions
 import functools
 import skimage.transform
 from IPython import embed
+
+from . import networks_basic as networks
+from PerceptualSimilarity.util import util
 
 class DistModel(BaseModel):
     def name(self):
@@ -57,7 +64,9 @@ class DistModel(BaseModel):
             if not use_gpu:
                 kw['map_location'] = 'cpu'
             if(model_path is None):
-                model_path = './weights/v%s/%s.pth'%(version,net)
+                import inspect
+                # model_path = './PerceptualSimilarity/weights/v%s/%s.pth'%(version,net)
+                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', '..', 'weights/v%s/%s.pth'%(version,net)))
 
             if(not is_train):
                 print('Loading model from: %s'%model_path)

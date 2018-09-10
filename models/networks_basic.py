@@ -1,13 +1,20 @@
+
+from __future__ import absolute_import
+
+import sys
+sys.path.append('..')
+sys.path.append('.')
 import torch
 import torch.nn as nn
 import torch.nn.init as init
 from torch.autograd import Variable
 import numpy as np
 from pdb import set_trace as st
-from util import util
 from skimage import color
 from IPython import embed
 from . import pretrained_networks as pn
+
+from PerceptualSimilarity.util import util
 
 # Off-the-shelf deep network
 class PNet(nn.Module):
