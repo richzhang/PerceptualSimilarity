@@ -1,11 +1,10 @@
 
 ## Perceptual Similarity Metric and Dataset [[Project Page]](http://richzhang.github.io/PerceptualSimilarity/)
 
-This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset** proposed in the paper below. It can also be used as an implementation of the "perceptual loss".
+This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset**. It can also be used as an implementation of the "perceptual loss". This is a PyTorch implementation; a Tensorflow alternative is [[here](https://github.com/alexlee-gk/lpips-tensorflow)].
 
 **The Unreasonable Effectiveness of Deep Features as a Perceptual Metric**  
-[Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/).  
-In [CVPR](https://arxiv.org/abs/1801.03924), 2018.  
+[Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/). In [CVPR](https://arxiv.org/abs/1801.03924), 2018.  
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
