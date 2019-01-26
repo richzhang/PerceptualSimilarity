@@ -26,7 +26,7 @@ class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='alex', pnet_rand=False, pnet_tune=False, model_path=None, colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None, is_train=False, lr=.0001, beta1=0.5, version='0.1'):
+    def initialize(self, model='net-lin', net='alex', pnet_rand=False, pnet_tune=False, model_path=None, colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None, is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0]):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -46,6 +46,7 @@ class DistModel(BaseModel):
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
             version - 0.1 for latest, 0.0 was original
+            gpu_ids - list of available GPUs
         '''
         BaseModel.initialize(self, use_gpu=use_gpu)
 
@@ -60,7 +61,7 @@ class DistModel(BaseModel):
 
         self.model_name = '%s [%s]'%(model,net)
         if(self.model == 'net-lin'): # pretrained net + linear layer
-            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,use_dropout=True,spatial=spatial,version=version)
+            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,use_dropout=True,spatial=spatial,version=version, gpu_ids=gpu_ids)
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
@@ -71,7 +72,8 @@ class DistModel(BaseModel):
 
             if(not is_train):
                 print('Loading model from: %s'%model_path)
-                self.net.load_state_dict(torch.load(model_path, **kw))
+                # strict false for scaling and sequential parameters
+                self.net.load_state_dict(torch.load(model_path, **kw), strict=False)
 
         elif(self.model=='net'): # pretrained network
             assert not self.spatial, 'spatial argument not supported yet for uncalibrated networks'
@@ -97,6 +99,13 @@ class DistModel(BaseModel):
             self.optimizer_net = torch.optim.Adam(self.parameters, lr=lr, betas=(beta1, 0.999))
         else: # test mode
             self.net.eval()
+
+        ## Multi-gpu
+        if use_gpu:
+            if len(gpu_ids) > 1:
+                self.net = torch.nn.DataParallel(self.net, device_ids=gpu_ids)
+            self.net.cuda(gpu_ids[0])
+
 
         if(printNet):
             print('---------- Networks initialized -------------')
@@ -151,9 +160,9 @@ class DistModel(BaseModel):
                     spatial_shape = (in0.size()[2],in0.size()[3])
                 else:
                     spatial_shape = (max([x.shape[0] for x in L])*self.spatial_factor, max([x.shape[1] for x in L])*self.spatial_factor)
-            
+
             L = [skimage.transform.resize(x, spatial_shape, order=self.spatial_order, mode='edge') for x in L]
-            
+
             L = np.mean(np.concatenate(L, 2) * len(L), 2)
             return L
         else:

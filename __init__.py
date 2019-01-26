@@ -6,11 +6,11 @@ import torch
 from .models import dist_model
 
 class PerceptualLoss(torch.nn.Module):
-    def __init__(self, model='net-lin', net='vgg', use_gpu=True): # VGG using our perceptually-learned weights (LPIPS metric)
+    def __init__(self, model='net-lin', net='vgg', use_gpu=True, gpu_ids=[0]): # VGG using our perceptually-learned weights (LPIPS metric)
     # def __init__(self, model='net', net='vgg', use_gpu=True): # "default" way of using VGG
         print('Setting up Perceptual loss...')
         self.model = dist_model.DistModel()
-        self.model.initialize(model=model, net=net, use_gpu=True)
+        self.model.initialize(model=model, net=net, use_gpu=True, gpu_ids=gpu_ids)
         print('...Done')
 
     def forward(self, pred, target, normalize=False):

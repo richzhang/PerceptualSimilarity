@@ -28,9 +28,6 @@ class PNet(nn.Module):
         self.pnet_type = pnet_type
         self.pnet_rand = pnet_rand
 
-        self.shift = torch.autograd.Variable(torch.Tensor([-.030, -.088, -.188]).view(1,3,1,1))
-        self.scale = torch.autograd.Variable(torch.Tensor([.458, .448, .450]).view(1,3,1,1))
-        
         if(self.pnet_type in ['vgg','vgg16']):
             self.net = pn.vgg16(pretrained=not self.pnet_rand,requires_grad=False)
         elif(self.pnet_type=='alex'):
@@ -42,14 +39,14 @@ class PNet(nn.Module):
 
         self.L = self.net.N_slices
 
+        self.scaling_layer = ScalingLayer()
+
         if(use_gpu):
             self.net.cuda()
-            self.shift = self.shift.cuda()
-            self.scale = self.scale.cuda()
+            self.scaling_layer.cuda()
 
     def forward(self, in0, in1, retPerLayer=False):
-        in0_sc = (in0 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
-        in1_sc = (in1 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
+        in0_sc, in1_sc = self.scaling_layer(in0, in1)
 
         outs0 = self.net.forward(in0_sc)
         outs1 = self.net.forward(in1_sc)
@@ -73,7 +70,7 @@ class PNet(nn.Module):
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, use_gpu=True, spatial=False, version='0.1'):
+    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, use_gpu=True, spatial=False, version='0.1', gpu_ids=[0]):
         super(PNetLin, self).__init__()
 
         self.use_gpu = use_gpu
@@ -82,6 +79,7 @@ class PNetLin(nn.Module):
         self.pnet_rand = pnet_rand
         self.spatial = spatial
         self.version = version
+        self.gpu_ids = gpu_ids
 
         if(self.pnet_type in ['vgg','vgg16']):
             net_type = pn.vgg16
@@ -95,8 +93,13 @@ class PNetLin(nn.Module):
 
         if(self.pnet_tune):
             self.net = net_type(pretrained=not self.pnet_rand,requires_grad=True)
+            if len(self.gpu_ids) > 1:
+                self.net = torch.nn.DataParallel(self.net, device_ids=self.gpu_ids)
+                self.net.cuda(self.gpu_ids[0])
         else:
-            self.net = [net_type(pretrained=not self.pnet_rand,requires_grad=False),]
+            self.net = nn.Sequential(
+                net_type(pretrained=not self.pnet_rand, requires_grad=False)
+            )
 
         self.lin0 = NetLinLayer(self.chns[0],use_dropout=use_dropout)
         self.lin1 = NetLinLayer(self.chns[1],use_dropout=use_dropout)
@@ -109,28 +112,10 @@ class PNetLin(nn.Module):
             self.lin6 = NetLinLayer(self.chns[6],use_dropout=use_dropout)
             self.lins+=[self.lin5,self.lin6]
 
-        self.shift = torch.autograd.Variable(torch.Tensor([-.030, -.088, -.188]).view(1,3,1,1))
-        self.scale = torch.autograd.Variable(torch.Tensor([.458, .448, .450]).view(1,3,1,1))
-
-        if(use_gpu):
-            if(self.pnet_tune):
-                self.net.cuda()
-            else:
-                self.net[0].cuda()
-            self.shift = self.shift.cuda()
-            self.scale = self.scale.cuda()
-            self.lin0.cuda()
-            self.lin1.cuda()
-            self.lin2.cuda()
-            self.lin3.cuda()
-            self.lin4.cuda()
-            if(self.pnet_type=='squeeze'):
-                self.lin5.cuda()
-                self.lin6.cuda()
+        self.scaling_layer = ScalingLayer()
 
     def forward(self, in0, in1):
-        in0_sc = (in0 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
-        in1_sc = (in1 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
+        in0_sc, in1_sc = self.scaling_layer(in0, in1)
 
         if(self.version=='0.0'):
             # v0.0 - original release had a bug, where input was not scaled
@@ -152,10 +137,10 @@ class PNetLin(nn.Module):
         feats1 = {}
         diffs = [0]*len(outs0)
 
-        for (kk,out0) in enumerate(outs0):
+        for k, (kk,out0) in enumerate(outs0.items()):
             feats0[kk] = util.normalize_tensor(outs0[kk])
             feats1[kk] = util.normalize_tensor(outs1[kk])
-            diffs[kk] = (feats0[kk]-feats1[kk])**2
+            diffs[k] = (feats0[kk]-feats1[kk])**2
 
         if self.spatial:
             lin_models = [self.lin0, self.lin1, self.lin2, self.lin3, self.lin4]
@@ -163,7 +148,7 @@ class PNetLin(nn.Module):
                 lin_models.extend([self.lin5, self.lin6])
             res = [lin_models[kk].model(diffs[kk]) for kk in range(len(diffs))]
             return res
-			
+
         val = torch.mean(torch.mean(self.lin0.model(diffs[0]),dim=3),dim=2)
         val = val + torch.mean(torch.mean(self.lin1.model(diffs[1]),dim=3),dim=2)
         val = val + torch.mean(torch.mean(self.lin2.model(diffs[2]),dim=3),dim=2)
@@ -176,6 +161,20 @@ class PNetLin(nn.Module):
         val = val.view(val.size()[0],val.size()[1],1,1)
 
         return val
+
+class ScalingLayer(nn.Module):
+    def __init__(self):
+        super(ScalingLayer, self).__init__()
+        self.shift = torch.nn.Parameter(
+            torch.Tensor([-.030, -.088, -.188]).view(1, 3, 1, 1))
+        self.scale = torch.nn.Parameter(
+            torch.Tensor([.458, .448, .450]).view(1, 3, 1, 1))
+
+    def forward(self, in0, in1):
+        in0_sc = (in0 - self.shift.expand_as(in0)) / self.scale.expand_as(in0)
+        in1_sc = (in1 - self.shift.expand_as(in0)) / self.scale.expand_as(in0)
+
+        return in0_sc, in1_sc
 
 class Dist2LogitLayer(nn.Module):
     ''' takes 2 distances, puts through fc layers, spits out value between [0,1] (if use_sigmoid is True) '''
@@ -239,7 +238,7 @@ class L2(FakeNet):
             value = torch.mean(torch.mean(torch.mean((in0-in1)**2,dim=1).view(N,1,X,Y),dim=2).view(N,1,1,Y),dim=3).view(N)
             return value
         elif(self.colorspace=='Lab'):
-            value = util.l2(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
+            value = util.l2(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)),
                 util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
             ret_var = Variable( torch.Tensor((value,) ) )
             if(self.use_gpu):
@@ -254,7 +253,7 @@ class DSSIM(FakeNet):
         if(self.colorspace=='RGB'):
             value = util.dssim(1.*util.tensor2im(in0.data), 1.*util.tensor2im(in1.data), range=255.).astype('float')
         elif(self.colorspace=='Lab'):
-            value = util.dssim(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
+            value = util.dssim(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)),
                 util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
         ret_var = Variable( torch.Tensor((value,) ) )
         if(self.use_gpu):
