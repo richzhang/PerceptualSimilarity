@@ -15,7 +15,7 @@ from IPython import embed
 from . import pretrained_networks as pn
 
 # from PerceptualSimilarity.util import util
-from util import util
+from ..util import util
 
 # Off-the-shelf deep network
 class PNet(nn.Module):

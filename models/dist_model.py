@@ -20,7 +20,7 @@ from IPython import embed
 
 from . import networks_basic as networks
 # from PerceptualSimilarity.util import util
-from util import util
+from ..util import util
 
 class DistModel(BaseModel):
     def name(self):
