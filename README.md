@@ -45,7 +45,7 @@ d = model.forward(im0,im1)
 
 Variable `net` can be `squeeze`, `alex`, `vgg`. Network `alex` is fastest, performs the best, and is the default. Set variable `model=net` for an uncalibrated off-the-shelf network (taking cos distance). Variables ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). Variable `d` will be a length `N` numpy array.
 
-Script [`test_network.py`](test_network.py) contains example usage. Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](imgs/ex_p1.png). Before running it - which do you think *should* be closer? A more detailed explanation is below.
+Script [`test_network.py`](test_network.py) contains example usage. Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](imgs/ex_p1.png). Before running it - which do you think *should* be closer?
 
 ### (B) Backpropping through the metric
 
