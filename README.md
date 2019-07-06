@@ -28,9 +28,9 @@ Using this code, you can simply call `model.forward(im0,im1)` to evaluate the di
 
 ### (A.I) Usage (Line command)
 
-Computing the distance between two images: `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu`
+Two images: `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu`
 
-Computing the distance between pairs of images within two directories: `python ./compute_dists_dirs.py --dir0 ./imgs/ex_dir0 --dir1 ./imgs/ex_dir1 --out ./imgs/example_dists.txt --use_gpu`
+Two directories: `python compute_dists_dirs.py --dir0 imgs/ex_dir0 --dir1 imgs/ex_dir1 --out imgs/example_dists.txt --use_gpu`
 
 ### (A.II) Usage (Python code)
 
@@ -43,9 +43,9 @@ model.initialize(use_gpu=True)
 d = model.forward(im0,im1)
 ```
 
-Run `python [test_network.py](test_network.py)` to take the distance between example reference image [`ex_ref.png`](imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](imgs/ex_p1.png). Before running it - which do you think *should* be closer?
+Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](imgs/ex_p1.png). Before running it - which do you think *should* be closer?
 
-**Some Options** By default in `model.initialize`,
+**Some Options** By default in `model.initialize`:
 - `net='alex'`: Network `alex` is fastest, performs the best, and is the default. You can instead use `squeeze` or `vgg`.
 - `model='net-lin'`: This has a linear calibration on top of intermediate features. Set it to `model=net` for an uncalibrated off-the-shelf network (taking cos distance).
 
