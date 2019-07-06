@@ -40,7 +40,7 @@ Evaluate the distance between image patches. Higher means further/more different
 
 ### (A) Basic Usage
 
-#### (A.I) Line command
+#### (A.I) Line commands
 
 Take the distance between two images or two directories.
 
