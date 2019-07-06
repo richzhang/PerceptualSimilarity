@@ -1,32 +1,25 @@
 
 ## Perceptual Similarity Metric and Dataset [[Project Page]](http://richzhang.github.io/PerceptualSimilarity/)
 
-This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset**. It can also be used as an implementation of the "perceptual loss". This is a PyTorch implementation; a Tensorflow alternative is [[here](https://github.com/alexlee-gk/lpips-tensorflow)].
-
 **The Unreasonable Effectiveness of Deep Features as a Perceptual Metric**  
 [Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/). In [CVPR](https://arxiv.org/abs/1801.03924), 2018.  
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
-** Table of Contents **
+This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset**. It can also be used as an implementation of the "perceptual loss". This is a PyTorch implementation; a Tensorflow alternative is [[here](https://github.com/alexlee-gk/lpips-tensorflow)].
 
-1. [LPIPS metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)
+**Table of Contents**
 
-   a. [Basic Usage](#a-basic-usage) If you just want to run the metric, this is all you need.
+1. [LPIPS metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)<br>
+   a. [Basic Usage](#a-basic-usage) If you just want to run the metric, this is all you need.<br>
+   b. ["Perceptual Loss" usage](#b-backpropping-through-the-metric)<br>
+   c. [About the metric](#c-about-the-metric)<br>
 
-   b. [Backpropping](#b-backpropping-through-the-metric)
-
-   c. [About the metric](#c-about-the-metric)
-
-2. [BAPPS dataset](#2-berkeley-adobe-perceptual-patch-similarity-bapps-dataset)
-
-   a. [Download](#a-downloading-the-dataset)
-
-   b. [Evaluation](#b-evaluating-a-perceptual-similarity-metric-on-a-dataset)
-
-   c. [About the dataset](#c-about-the-dataset)
-
-   d. [Train the metric using the dataset](#d-using-the-dataset-to-train-the-metric)
+2. [BAPPS dataset](#2-berkeley-adobe-perceptual-patch-similarity-bapps-dataset)<br>
+   a. [Download](#a-downloading-the-dataset)<br>
+   b. [Evaluation](#b-evaluating-a-perceptual-similarity-metric-on-a-dataset)<br>
+   c. [About the dataset](#c-about-the-dataset)<br>
+   d. [Train the metric using the dataset](#d-using-the-dataset-to-train-the-metric)<br>
 
 ## (0) Dependencies/Setup
 
@@ -44,7 +37,7 @@ cd PerceptualSimilarity
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
 
-Evaluate the distance between image patches.
+Evaluate the distance between image patches. Higher means further/more different.
 
 ### (A) Basic Usage
 
