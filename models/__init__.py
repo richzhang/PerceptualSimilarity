@@ -15,6 +15,7 @@ class PerceptualLoss(torch.nn.Module):
     # def __init__(self, model='net', net='vgg', use_gpu=True): # "default" way of using VGG as a perceptual loss
         super(PerceptualLoss, self).__init__()
         print('Setting up Perceptual loss...')
+        self.use_gpu = use_gpu
         self.spatial = spatial
         self.model = dist_model.DistModel()
         self.model.initialize(model=model, net=net, use_gpu=use_gpu, colorspace=colorspace, spatial=self.spatial)
@@ -34,6 +35,10 @@ class PerceptualLoss(torch.nn.Module):
         if normalize:
             target = 2 * target  - 1
             pred = 2 * pred  - 1
+
+        if(self.use_gpu):
+            target = target.cuda()
+            pred = pred.cuda()
 
         if(not self.spatial):
             return self.model.forward_pair(target, pred)
