@@ -79,33 +79,32 @@ We found that deep network activations work surprisingly well as a perceptual si
 
 ### (A) Downloading the dataset
 
-Run `bash ./scripts/download_dataset.sh` to download and unzip the dataset. Dataset will appear in directory `./dataset`. Dataset takes [6.6 GB] total.
+Run `bash ./scripts/download_dataset.sh` to download and unzip the dataset into directory `./dataset`. It takes [6.6 GB] total. Alternatively, run `bash ./scripts/get_dataset_valonly.sh` to only download the validation set [1.3 GB].
 - 2AFC train [5.3 GB]
 - 2AFC val [1.1 GB]
 - JND val [0.2 GB]  
-Alternatively, run `bash ./scripts/get_dataset_valonly.sh` to only download the validation set (no training set).
 
 ### (B) Evaluating a perceptual similarity metric on a dataset
 
 Script `test_dataset_model.py` evaluates a perceptual model on a subset of the dataset.
 
 **Dataset flags**
-- `dataset_mode`: `2afc` or `jnd`, which type of perceptual judgment to evaluate
-- `datasets`: list the datasets to evaluate
-    - if `dataset_mode` was `2afc`, choices are [`train/traditional`, `train/cnn`, `val/traditional`, `val/cnn`, `val/superres`, `val/deblur`, `val/color`, `val/frameinterp`]
-    - if `dataset_mode` was `jnd`, choices are [`val/traditional`, `val/cnn`]
+- `--dataset_mode`: `2afc` or `jnd`, which type of perceptual judgment to evaluate
+- `--datasets`: list the datasets to evaluate
+    - if `--dataset_mode 2afc`: choices are [`train/traditional`, `train/cnn`, `val/traditional`, `val/cnn`, `val/superres`, `val/deblur`, `val/color`, `val/frameinterp`]
+    - if `--dataset_mode jnd`: choices are [`val/traditional`, `val/cnn`]
     
 **Perceptual similarity model flags**
-- `model`: perceptual similarity model to use
+- `--model`: perceptual similarity model to use
     - `net-lin` for our LPIPS learned similarity model (linear network on top of internal activations of pretrained network)
     - `net` for a classification network (uncalibrated with all layers averaged)
     - `l2` for Euclidean distance
     - `ssim` for Structured Similarity Image Metric
-- `net`: choices are [`squeeze`,`alex`,`vgg`] for the `net-lin` and `net` models (ignored for `l2` and `ssim` models)
-- `colorspace`: choices are [`Lab`,`RGB`], used for the `l2` and `ssim` models (ignored for `net-lin` and `net` models)
+- `--net`: [`squeeze`,`alex`,`vgg`] for the `net-lin` and `net` models; ignored for `l2` and `ssim` models
+- `--colorspace`: choices are [`Lab`,`RGB`], used for the `l2` and `ssim` models (ignored for `net-lin` and `net` models)
 
 **Misc flags**
-- `batch_size`: evaluation batch size (will default to 1 )
+- `--batch_size`: evaluation batch size (will default to 1)
 - `--use_gpu`: turn on this flag for GPU usage
 
 An example usage is as follows: `python ./test_dataset_model.py --dataset_mode 2afc --datasets val/traditional val/cnn --model net-lin --net alex --use_gpu --batch_size 50`. This would evaluate our model on the "traditional" and "cnn" validation datasets.
@@ -114,9 +113,9 @@ An example usage is as follows: `python ./test_dataset_model.py --dataset_mode 2
 
 The dataset contains two types of perceptual judgements: **Two Alternative Forced Choice (2AFC)** and **Just Noticeable Differences (JND)**.
 
-**(1) Two Alternative Forced Choice (2AFC)** - Data is contained in the `2afc` subdirectory. Evaluators were given a reference patch, along with two distorted patches, and were asked to select which of the distorted patches was "closer" to the reference patch.
+**(1) 2AFC** - Contained in `2afc` subdirectory. Evaluators were given a patch triplet (1 reference + 2 distorted). They were asked to select which of the distorted was "closer" to the reference.
 
-Training sets contain 2 human judgments/triplet.
+Training sets contain 2 judgments/triplet.
 - `train/traditional` [56.6k triplets]
 - `train/cnn` [38.1k triplets]
 - `train/mix` [56.6k triplets]
@@ -130,19 +129,19 @@ Validation sets contain 5 judgments/triplet.
 - `val/frameinterp` [1.9k triplets]
 
 Each 2AFC subdirectory contains the following folders:
-- `ref` contains the original reference patches
-- `p0,p1` contain the two distorted patches
-- `judge` contains what the human evaluators chose - 0 if all humans preferred p0, 1 if all humans preferred p1
+- `ref`: original reference patches
+- `p0,p1`: two distorted patches
+- `judge`: human judgments - 0 if all preferred p0, 1 if all humans preferred p1
 
-**(2) Just Noticeable Differences (JND)** - Data is contained in the `jnd` subdirectory. Evaluators were presented with two patches - a reference patch and a distorted patch - for a limited time, and were asked if they thought the patches were the same (identically) or difference. 
+**(2) JND)** - Contained in `jnd` subdirectory. Evaluators were presented with two patches - a reference and a distorted - for a limited time. They were asked if the patches were the same (identically) or different. 
 
 Each set contains 3 human evaluations/example.
-- `val/traditional` [4.8k patch pairs]
-- `val/cnn` [4.8k patch pairs]
+- `val/traditional` [4.8k pairs]
+- `val/cnn` [4.8k pairs]
 
 Each JND subdirectory contains the following folders:
-- `p0,p1` contain the two patches
-- `same` contains fraction of human evaluators who thought the patches were the same (0 if all humans thought patches were different, 1 if all humans thought patches were the same)
+- `p0,p1`: two patches
+- `same`: human judgments: 0 if all humans thought patches were different, 1 if all humans thought patches were same
 
 ### (D) Using the dataset to train the metric
 
