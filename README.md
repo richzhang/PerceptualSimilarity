@@ -7,11 +7,11 @@
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
-This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)**. It can also be used as a "perceptual loss". This uses PyTorch; a Tensorflow alternative is [here](https://github.com/alexlee-gk/lpips-tensorflow)].
+This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)**. It can also be used as a "perceptual loss". This uses PyTorch; a Tensorflow alternative is [here](https://github.com/alexlee-gk/lpips-tensorflow).
 
 **Table of Contents**<br>
 1. [Learned Perceptual Image Patch Similarity (LPIPS) metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)<br>
-   a. [Basic Usage](#a-basic-usage) If you just want to run the metric, this is all you need.<br>
+   a. [Basic Usage](#a-basic-usage) If you just want to run the metric through command line, this is all you need.<br>
    b. ["Perceptual Loss" usage](#b-backpropping-through-the-metric)<br>
    c. [About the metric](#c-about-the-metric)<br>
 2. [Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset](#2-berkeley-adobe-perceptual-patch-similarity-bapps-dataset)<br>
@@ -42,12 +42,13 @@ Evaluate the distance between image patches. Higher means further/more different
 
 #### (A.I) Line command
 
+Take the distance between <br>:
 **Two images** `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu` <br>
 **Two directories** `python compute_dists_dirs.py --dir0 imgs/ex_dir0 --dir1 imgs/ex_dir1 --out imgs/example_dists.txt --use_gpu`
 
 #### (A.II) Python code
 
-Load and run with the following. Variables ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). This returns `d`, a length `N` numpy array.
+File [test_network.py](test_network.py) shows example usage. The following code loads the model. 
 
 ```python
 from models import dist_model as dm
@@ -56,11 +57,13 @@ model.initialize(use_gpu=True)
 d = model.forward(im0,im1)
 ```
 
+Variables ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). This returns `d`, a length `N` numpy array.
+
 Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](imgs/ex_p1.png). Before running it - which do you think *should* be closer?
 
 **Some Options** By default in `model.initialize`:
 - `net='alex'`: Network `alex` is fastest, performs the best, and is the default. You can instead use `squeeze` or `vgg`.
-- `model='net-lin'`: This has a linear calibration on top of intermediate features. Set it to `model=net` for an uncalibrated off-the-shelf network (taking cos distance).
+- `model='net-lin'`: This adds a linear calibration on top of intermediate features in the net. Set this to `model=net` to equally weight all the features.
 
 ### (B) Backpropping through the metric
 
