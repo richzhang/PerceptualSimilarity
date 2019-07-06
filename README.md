@@ -48,7 +48,7 @@ Take the distance between <br>:
 
 #### (A.II) Python code
 
-File [test_network.py](test_network.py) shows example usage. The following code loads the model. 
+File [test_network.py](test_network.py) shows example usage. This snippet is all you really need.
 
 ```python
 from models import dist_model as dm
