@@ -60,7 +60,7 @@ for i in range(1000):
     dist = loss_fn.forward(model.forward(), ref, normalize=True)
     dist.backward()
     optimizer.step()
-    pred.data = torch.max(torch.clamp(pred.data, -1, 1))
+    # pred.data = torch.max(torch.clamp(pred.data, 0, 1))
     if i % 10 == 0:
         print('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
         pred_img = model.pred[0].data.cpu().numpy().transpose(1, 2, 0)
