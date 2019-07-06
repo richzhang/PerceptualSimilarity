@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-use_gpu = False
+use_gpu = True
 
 ref_path  = './imgs/ex_ref.png'
 pred_path = './imgs/ex_p1.png'
@@ -46,7 +46,7 @@ for i in range(1000):
     optimizer.step()
     pred.data = torch.clamp(pred.data, 0, 1)
     
-    if i % 10 == 0:
+        if i % 10 == 0:
         print('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
         pred_img = pred[0].data.cpu().numpy().transpose(1, 2, 0)
         pred_img = np.clip(pred_img, 0, 1)
