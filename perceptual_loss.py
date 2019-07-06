@@ -2,16 +2,14 @@
 from __future__ import absolute_import
 
 import sys
-sys.path.append('..')
-sys.path.append('.')
-import PerceptualSimilarity as ps
 import scipy
 import scipy.misc
 import numpy as np
 import torch
 from torch.autograd import Variable
+import models
 
-use_gpu = True
+use_gpu = False
 
 ref_path  = './imgs/ex_ref.png'
 pred_path = './imgs/ex_p1.png'
@@ -26,7 +24,7 @@ if(use_gpu):
     ref = ref.cuda()
     pred = pred.cuda()
 
-loss_fn = ps.PerceptualLoss(use_gpu=use_gpu)
+loss_fn = models.PerceptualLoss(model='net-lin', net='vgg', use_gpu=use_gpu)
 optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
 
 import matplotlib.pyplot as plt
@@ -46,13 +44,13 @@ for i in range(1000):
     optimizer.step()
     pred.data = torch.clamp(pred.data, 0, 1)
     
-        if i % 10 == 0:
+    if i % 10 == 0:
         print('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
         pred_img = pred[0].data.cpu().numpy().transpose(1, 2, 0)
         pred_img = np.clip(pred_img, 0, 1)
         ax = fig.add_subplot(132)            
         ax.imshow(pred_img)
-        ax.set_title('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
+        ax.set_title('iter %d, dist %.3f' % (i, dist.view(-1).data.cpu().numpy()[0]))
         plt.pause(5e-2)
         # plt.imsave('imgs_saved/%04d.jpg'%i,pred_img)
 

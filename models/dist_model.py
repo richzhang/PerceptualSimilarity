@@ -2,8 +2,8 @@
 from __future__ import absolute_import
 
 import sys
-sys.path.append('..')
-sys.path.append('.')
+# sys.path.append('..')
+# sys.path.append('.')
 import numpy as np
 import torch
 from torch import nn
@@ -25,7 +25,9 @@ class DistModel(BaseModel):
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='alex', pnet_rand=False, pnet_tune=False, model_path=None, colorspace='Lab', use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None, is_train=False, lr=.0001, beta1=0.5, version='0.1'):
+    def initialize(self, model='net-lin', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
+            use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None,
+            is_train=False, lr=.0001, beta1=0.5, version='0.1'):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -65,8 +67,7 @@ class DistModel(BaseModel):
                 kw['map_location'] = 'cpu'
             if(model_path is None):
                 import inspect
-                # model_path = './PerceptualSimilarity/weights/v%s/%s.pth'%(version,net)
-                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', '..', 'weights/v%s/%s.pth'%(version,net)))
+                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', 'weights/v%s/%s.pth'%(version,net)))
 
             if(not is_train):
                 print('Loading model from: %s'%model_path)
@@ -102,11 +103,11 @@ class DistModel(BaseModel):
             networks.print_network(self.net)
             print('-----------------------------------------------')
 
-    def forward_pair(self,in1,in2,retPerLayer=False):
+    def forward_pair(self, in1, in2, retPerLayer=False):
         if(retPerLayer):
-            return self.net.forward(in1,in2, retPerLayer=True)
+            return self.net.forward(in1, in2, retPerLayer=True)
         else:
-            return self.net.forward(in1,in2)
+            return self.net.forward(in1, in2)
 
     def forward(self, in0, in1, retNumpy=True):
         ''' Function computes the distance between image patches in0 and in1

@@ -51,9 +51,8 @@ Take the distance between:
 File [test_network.py](test_network.py) shows example usage. This snippet is all you really need.
 
 ```python
-from models import dist_model as dm
-model = dm.DistModel()
-model.initialize(use_gpu=True)
+import models
+model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu)
 d = model.forward(im0,im1)
 ```
 

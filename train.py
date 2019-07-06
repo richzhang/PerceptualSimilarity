@@ -40,8 +40,8 @@ if(not os.path.exists(opt.save_dir)):
 
 # initialize model
 model = dm.DistModel()
-# model.initialize(model=opt.model,net=opt.net,use_gpu=opt.use_gpu, is_train=True)
-model.initialize(model=opt.model,net=opt.net,use_gpu=opt.use_gpu, is_train=True, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk)
+model.initialize(model=opt.model, net=opt.net, use_gpu=opt.use_gpu, is_train=True, 
+    pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk)
 
 # load data from all training sets
 data_loader = dl.CreateDataLoader(opt.datasets,dataset_mode='2afc', batch_size=opt.batch_size, serial_batches=False)

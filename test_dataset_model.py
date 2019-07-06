@@ -25,7 +25,8 @@ if(opt.model in ['l2','ssim']):
 # initialize model
 model = dm.DistModel()
 # model.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
-model.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk, version=opt.version)
+model.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace, 
+	model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk, version=opt.version)
 
 if(opt.model in ['net-lin','net']):
 	print('Testing model [%s]-[%s]'%(opt.model,opt.net))
