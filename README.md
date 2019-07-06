@@ -24,15 +24,17 @@ cd PerceptualSimilarity
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
 
-Using this code, you can simply call `model.forward(im0,im1)` to evaluate the distance between two image patches.
+Evaluate the distance between image patches.
 
-### (A.I) Usage (Line command)
+### (A) Basic Usage
+
+#### (A.I) Line command
 
 Two images: `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu`
 
 Two directories: `python compute_dists_dirs.py --dir0 imgs/ex_dir0 --dir1 imgs/ex_dir1 --out imgs/example_dists.txt --use_gpu`
 
-### (A.II) Usage (Python code)
+#### (A.II) Python code
 
 Load and run with the following. Variables ```im0, im1``` are PyTorch tensors with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). This returns `d`, a length `N` numpy array.
 
