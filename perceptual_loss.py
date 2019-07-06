@@ -11,21 +11,26 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
+use_gpu = False
+
 ref_path  = './imgs/ex_ref.png'
-pred_path = './imgs/ex_p0.png'
+pred_path = './imgs/ex_p1.png'
 
 ref_img = scipy.misc.imread(ref_path).transpose(2, 0, 1) / 255.
 pred_img = scipy.misc.imread(pred_path).transpose(2, 0, 1) / 255.
 
 # Torchify
-ref = Variable(torch.FloatTensor(ref_img).cuda(), requires_grad=False)
-pred = Variable(torch.FloatTensor(pred_img).cuda())
+ref = Variable(torch.FloatTensor(ref_img), requires_grad=False)
+pred = Variable(torch.FloatTensor(pred_img))
+if(use_gpu):
+    ref = ref.cuda()
+    pred = pred.cuda()
 
 # 1 x 3 x H x W
 ref = ref.unsqueeze(0)
 pred = pred.unsqueeze(0)
 
-loss_fn = ps.PerceptualLoss()
+loss_fn = ps.PerceptualLoss(use_gpu=use_gpu)
 dist = loss_fn.forward(pred, ref, normalize=True)
 
 # As optimization, test backprop
@@ -39,6 +44,7 @@ class PerceptModel(torch.nn.Module):
 
 model = PerceptModel()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999))
+
 import matplotlib.pyplot as plt
 plt.ion()
 fig = plt.figure(1)
@@ -53,12 +59,16 @@ for i in range(1000):
     optimizer.zero_grad()
     dist = loss_fn.forward(model.forward(), ref, normalize=True)
     dist.backward()
+    optimizer.step()
+    pred.data = torch.max(torch.clamp(pred.data, -1, 1))
     if i % 10 == 0:
         print('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
         pred_img = model.pred[0].data.cpu().numpy().transpose(1, 2, 0)
+        pred_img = np.clip(pred_img, 0, 1)
         ax = fig.add_subplot(132)            
-        ax.imshow(np.clip(pred_img, 0, 1))
+        ax.imshow(pred_img)
         ax.set_title('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
         plt.pause(5e-2)
-    optimizer.step()
+        # plt.imsave('imgs_saved/%04d.jpg'%i,pred_img)
+
 

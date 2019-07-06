@@ -14,8 +14,7 @@ from skimage import color
 from IPython import embed
 from . import pretrained_networks as pn
 
-# from PerceptualSimilarity.util import util
-from util import util
+import models as util
 
 # Off-the-shelf deep network
 class PNet(nn.Module):
@@ -61,7 +60,6 @@ class PNet(nn.Module):
             if(kk==0):
                 val = 1.*cur_score
             else:
-                # val = val + self.lambda_feat_layers[kk]*cur_score
                 val = val + cur_score
             if(retPerLayer):
                 all_scores+=[cur_score]

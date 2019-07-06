@@ -19,8 +19,7 @@ import skimage.transform
 from IPython import embed
 
 from . import networks_basic as networks
-# from PerceptualSimilarity.util import util
-from util import util
+import models as util
 
 class DistModel(BaseModel):
     def name(self):

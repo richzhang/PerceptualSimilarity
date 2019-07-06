@@ -11,14 +11,14 @@ class PerceptualLoss(torch.nn.Module):
         super(PerceptualLoss, self).__init__()
         print('Setting up Perceptual loss...')
         self.model = dist_model.DistModel()
-        self.model.initialize(model=model, net=net, use_gpu=True)
+        self.model.initialize(model=model, net=net, use_gpu=use_gpu)
         print('...Done')
 
     def forward(self, pred, target, normalize=False):
         """
         Pred and target are Variables.
-        If normalize is on, assumes the images are between [0,1] and then scales thembetween [-1, 1]
-        If normalize is false, assumes the images are already between [-1,+1]
+        If normalize is True, assumes the images are between [0,1] and then scales them between [-1,+1]
+        If normalize is False, assumes the images are already between [-1,+1]
 
         Inputs pred and target are Nx3xHxW
         Output pytorch Variable N long

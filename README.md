@@ -101,7 +101,7 @@ Script `test_dataset_model.py` evaluates a perceptual model on a subset of the d
     - `l2` for Euclidean distance
     - `ssim` for Structured Similarity Image Metric
 - `--net`: [`squeeze`,`alex`,`vgg`] for the `net-lin` and `net` models; ignored for `l2` and `ssim` models
-- `--colorspace`: choices are [`Lab`,`RGB`], used for the `l2` and `ssim` models (ignored for `net-lin` and `net` models)
+- `--colorspace`: choices are [`Lab`,`RGB`], used for the `l2` and `ssim` models; ignored for `net-lin` and `net` models
 
 **Misc flags**
 - `--batch_size`: evaluation batch size (will default to 1)
@@ -113,7 +113,7 @@ An example usage is as follows: `python ./test_dataset_model.py --dataset_mode 2
 
 The dataset contains two types of perceptual judgements: **Two Alternative Forced Choice (2AFC)** and **Just Noticeable Differences (JND)**.
 
-**(1) 2AFC** - Contained in `2afc` subdirectory. Evaluators were given a patch triplet (1 reference + 2 distorted). They were asked to select which of the distorted was "closer" to the reference.
+**(1) 2AFC** Evaluators were given a patch triplet (1 reference + 2 distorted). They were asked to select which of the distorted was "closer" to the reference.
 
 Training sets contain 2 judgments/triplet.
 - `train/traditional` [56.6k triplets]
@@ -133,7 +133,7 @@ Each 2AFC subdirectory contains the following folders:
 - `p0,p1`: two distorted patches
 - `judge`: human judgments - 0 if all preferred p0, 1 if all humans preferred p1
 
-**(2) JND)** - Contained in `jnd` subdirectory. Evaluators were presented with two patches - a reference and a distorted - for a limited time. They were asked if the patches were the same (identically) or different. 
+**(2) JND** Evaluators were presented with two patches - a reference and a distorted - for a limited time. They were asked if the patches were the same (identically) or different. 
 
 Each set contains 3 human evaluations/example.
 - `val/traditional` [4.8k pairs]
