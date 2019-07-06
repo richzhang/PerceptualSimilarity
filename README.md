@@ -8,6 +8,26 @@ This repository contains the **(1) Learned Perceptual Image Patch Similarity (LP
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
+** Table of Contents **
+
+1. [LPIPS metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)
+
+   a. [Basic Usage](#a-basic-usage) If you just want to run the metric, this is all you need.
+
+   b. [Backpropping](#b-backpropping-through-the-metric)
+
+   c. [About the metric](#c-about-the-metric)
+
+2. [BAPPS dataset](#2-berkeley-adobe-perceptual-patch-similarity-bapps-dataset)
+
+   a. [Download](#a-downloading-the-dataset)
+
+   b. [Evaluation](#b-evaluating-a-perceptual-similarity-metric-on-a-dataset)
+
+   c. [About the dataset](#c-about-the-dataset)
+
+   d. [Train the metric using the dataset](#d-using-the-dataset-to-train-the-metric)
+
 ## (0) Dependencies/Setup
 
 ### Installation
