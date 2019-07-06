@@ -6,16 +6,14 @@
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
-This repository contains the **(1) Learned Perceptual Image Patch Similarity (LPIPS) metric** and **(2) Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset**. It can also be used as an implementation of the "perceptual loss". This is a PyTorch implementation; a Tensorflow alternative is [[here](https://github.com/alexlee-gk/lpips-tensorflow)].
+This repository contains our perceptual metric (LPIPS) and dataset (BAPPS). It can also be used as a "perceptual loss". This uses PyTorch; a Tensorflow alternative is [[here](https://github.com/alexlee-gk/lpips-tensorflow)].
 
-**Table of Contents**
-
-1. [LPIPS metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)<br>
+**Table of Contents**<br>
+1. [Learned Perceptual Image Patch Similarity (LPIPS) metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)<br>
    a. [Basic Usage](#a-basic-usage) If you just want to run the metric, this is all you need.<br>
    b. ["Perceptual Loss" usage](#b-backpropping-through-the-metric)<br>
    c. [About the metric](#c-about-the-metric)<br>
-
-2. [BAPPS dataset](#2-berkeley-adobe-perceptual-patch-similarity-bapps-dataset)<br>
+2. [Berkeley-Adobe Perceptual Patch Similarity (BAPPS) dataset](#2-berkeley-adobe-perceptual-patch-similarity-bapps-dataset)<br>
    a. [Download](#a-downloading-the-dataset)<br>
    b. [Evaluation](#b-evaluating-a-perceptual-similarity-metric-on-a-dataset)<br>
    c. [About the dataset](#c-about-the-dataset)<br>
