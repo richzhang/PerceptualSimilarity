@@ -41,9 +41,8 @@ Evaluate the distance between image patches. Higher means further/more different
 
 #### (A.I) Line command
 
-Two images: `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu`
-
-Two directories: `python compute_dists_dirs.py --dir0 imgs/ex_dir0 --dir1 imgs/ex_dir1 --out imgs/example_dists.txt --use_gpu`
+**Two images** `python compute_dists.py --path0 imgs/ex_ref.png --path1 imgs/ex_p0.png --use_gpu` <br>
+**Two directories** `python compute_dists_dirs.py --dir0 imgs/ex_dir0 --dir1 imgs/ex_dir1 --out imgs/example_dists.txt --use_gpu`
 
 #### (A.II) Python code
 
