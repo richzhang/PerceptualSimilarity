@@ -20,30 +20,14 @@ ref_img = scipy.misc.imread(ref_path).transpose(2, 0, 1) / 255.
 pred_img = scipy.misc.imread(pred_path).transpose(2, 0, 1) / 255.
 
 # Torchify
-ref = Variable(torch.FloatTensor(ref_img), requires_grad=False)
-pred = Variable(torch.FloatTensor(pred_img))
+ref = Variable(torch.FloatTensor(ref_img).unsqueeze(0), requires_grad=False)
+pred = Variable(torch.FloatTensor(pred_img).unsqueeze(0), requires_grad=True)
 if(use_gpu):
     ref = ref.cuda()
     pred = pred.cuda()
 
-# 1 x 3 x H x W
-ref = ref.unsqueeze(0)
-pred = pred.unsqueeze(0)
-
 loss_fn = ps.PerceptualLoss(use_gpu=use_gpu)
-dist = loss_fn.forward(pred, ref, normalize=True)
-
-# As optimization, test backprop
-class PerceptModel(torch.nn.Module):
-    def __init__(self):
-        super(PerceptModel, self).__init__()
-        self.pred = torch.nn.Parameter(pred.data)
-
-    def forward(self):
-        return self.pred
-
-model = PerceptModel()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999))
+optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
 
 import matplotlib.pyplot as plt
 plt.ion()
@@ -56,14 +40,15 @@ ax.imshow(pred_img.transpose(1, 2, 0))
 ax.set_title('orig pred')
 
 for i in range(1000):
+    dist = loss_fn.forward(pred, ref, normalize=True)
     optimizer.zero_grad()
-    dist = loss_fn.forward(model.forward(), ref, normalize=True)
     dist.backward()
     optimizer.step()
-    pred.data = torch.max(torch.clamp(pred.data, -1, 1))
+    pred.data = torch.clamp(pred.data, 0, 1)
+    
     if i % 10 == 0:
         print('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
-        pred_img = model.pred[0].data.cpu().numpy().transpose(1, 2, 0)
+        pred_img = pred[0].data.cpu().numpy().transpose(1, 2, 0)
         pred_img = np.clip(pred_img, 0, 1)
         ax = fig.add_subplot(132)            
         ax.imshow(pred_img)
