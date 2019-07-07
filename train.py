@@ -31,9 +31,9 @@ parser.add_argument('--name', type=str, default='tmp', help='directory name for 
 
 parser.add_argument('--from_scratch', action='store_true', help='model was initialized from scratch')
 parser.add_argument('--train_trunk', action='store_true', help='model trunk was trained/tuned')
+parser.add_argument('--train_plot', action='store_true', help='plot saving')
 
 opt = parser.parse_args()
-opt.train_plot = True
 opt.save_dir = os.path.join(opt.checkpoints_dir,opt.name)
 if(not os.path.exists(opt.save_dir)):
     os.mkdir(opt.save_dir)
