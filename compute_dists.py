@@ -1,6 +1,6 @@
 import argparse
-from models import dist_model as dm
-from util import util
+from PerceptualSimilarity.models import dist_model as dm
+from PerceptualSimilarity.util import util
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--path0', type=str, default='./imgs/ex_ref.png')

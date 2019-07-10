@@ -1,8 +1,8 @@
 import argparse
 import os
 from IPython import embed
-from util import util
-import models.dist_model as dm
+from PerceptualSimilarity.util import util
+import PerceptualSimilarity.models.dist_model as dm
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--dir0', type=str, default='./imgs/ex_dir0')

@@ -1,7 +1,7 @@
 # import sys; sys.path += ['models']
 import torch
-from util import util
-from models import dist_model as dm
+from PerceptualSimilarity.util import util
+from PerceptualSimilarity.models import dist_model as dm
 from IPython import embed
 
 use_gpu = True         # Whether to use GPU

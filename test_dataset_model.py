@@ -1,6 +1,6 @@
 import numpy as np
-from models import dist_model as dm
-from data import data_loader as dl
+from PerceptualSimilarity.models import dist_model as dm
+from PerceptualSimilarity.data import data_loader as dl
 import argparse
 from IPython import embed
 
