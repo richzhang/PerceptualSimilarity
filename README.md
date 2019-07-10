@@ -39,7 +39,7 @@ Script [`test_network.py`](test_network.py) contains example usage. Run `python 
 Load a model with the following commands.
 
 ```python
-from models import dist_model as dm
+from PerceptualSimilarity.models import dist_model as dm
 model = dm.DistModel()
 model.initialize(model='net-lin',net='alex',use_gpu=True,version='0.1')
 ```
