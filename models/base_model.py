@@ -11,10 +11,9 @@ class BaseModel():
     def name(self):
         return 'BaseModel'
 
-    def initialize(self, use_gpu=True):
+    def initialize(self, use_gpu=True, gpu_ids=[0]):
         self.use_gpu = use_gpu
-        self.Tensor = torch.cuda.FloatTensor if self.use_gpu else torch.Tensor
-        # self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
+        self.gpu_ids = gpu_ids
 
     def forward(self):
         pass

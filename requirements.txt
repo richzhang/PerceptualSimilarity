@@ -5,3 +5,4 @@ scipy>=1.0.1
 scikit-image>=0.13.0
 opencv>=2.4.11
 matplotlib>=1.5.1
+tqdm>=4.28.1

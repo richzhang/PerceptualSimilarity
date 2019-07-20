@@ -16,11 +16,14 @@ parser.add_argument('--model', type=str, default='net-lin', help='distance model
 parser.add_argument('--net', type=str, default='alex', help='[squeeze], [alex], or [vgg] for network architectures')
 parser.add_argument('--batch_size', type=int, default=50, help='batch size to test image patches in')
 parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use GPU')
+parser.add_argument('--gpu_ids', type=int, nargs='+', default=[0], help='gpus to use')
+
+parser.add_argument('--nThreads', type=int, default=4, help='number of threads to use in data loader')
 parser.add_argument('--nepoch', type=int, default=5, help='# epochs at base learning rate')
 parser.add_argument('--nepoch_decay', type=int, default=5, help='# additional epochs at linearly learning rate')
 parser.add_argument('--display_freq', type=int, default=5000, help='frequency (in instances) of showing training results on screen')
 parser.add_argument('--print_freq', type=int, default=5000, help='frequency (in instances) of showing training results on console')
-parser.add_argument('--save_latest_freq', type=int, default=10000, help='frequency (in instances) of saving the latest results')
+parser.add_argument('--save_latest_freq', type=int, default=20000, help='frequency (in instances) of saving the latest results')
 parser.add_argument('--save_epoch_freq', type=int, default=1, help='frequency of saving checkpoints at the end of epochs')
 parser.add_argument('--display_id', type=int, default=0, help='window id of the visdom display, [0] for no displaying')
 parser.add_argument('--display_winsize', type=int, default=256,  help='display window size')
@@ -41,10 +44,10 @@ if(not os.path.exists(opt.save_dir)):
 # initialize model
 model = dm.DistModel()
 model.initialize(model=opt.model, net=opt.net, use_gpu=opt.use_gpu, is_train=True, 
-    pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk)
+    pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk, gpu_ids=opt.gpu_ids)
 
 # load data from all training sets
-data_loader = dl.CreateDataLoader(opt.datasets,dataset_mode='2afc', batch_size=opt.batch_size, serial_batches=False)
+data_loader = dl.CreateDataLoader(opt.datasets,dataset_mode='2afc', batch_size=opt.batch_size, serial_batches=False, nThreads=opt.nThreads)
 dataset = data_loader.load_data()
 dataset_size = len(data_loader)
 D = len(dataset)

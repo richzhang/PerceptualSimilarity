@@ -12,6 +12,9 @@ parser.add_argument('--net', type=str, default='alex', help='[squeeze], [alex], 
 parser.add_argument('--colorspace', type=str, default='Lab', help='[Lab] or [RGB] for colorspace to use for l2, ssim model types')
 parser.add_argument('--batch_size', type=int, default=50, help='batch size to test image patches in')
 parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use GPU')
+parser.add_argument('--gpu_ids', type=int, nargs='+', default=[0], help='gpus to use')
+parser.add_argument('--nThreads', type=int, default=4, help='number of threads to use in data loader')
+
 parser.add_argument('--model_path', type=str, default=None, help='location of model, will default to ./weights/v[version]/[net_name].pth')
 
 parser.add_argument('--from_scratch', action='store_true', help='model was initialized from scratch')
@@ -26,23 +29,23 @@ if(opt.model in ['l2','ssim']):
 model = dm.DistModel()
 # model.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
 model.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace, 
-	model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk, version=opt.version)
+	model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk,
+	version=opt.version, gpu_ids=opt.gpu_ids)
 
 if(opt.model in ['net-lin','net']):
 	print('Testing model [%s]-[%s]'%(opt.model,opt.net))
 elif(opt.model in ['l2','ssim']):
 	print('Testing model [%s]-[%s]'%(opt.model,opt.colorspace))
 
-# embed()
 # initialize data loader
 for dataset in opt.datasets:
-	data_loader = dl.CreateDataLoader(dataset,dataset_mode=opt.dataset_mode, batch_size=opt.batch_size)
+	data_loader = dl.CreateDataLoader(dataset,dataset_mode=opt.dataset_mode, batch_size=opt.batch_size, nThreads=opt.nThreads)
 
 	# evaluate model on data
 	if(opt.dataset_mode=='2afc'):
-		(score, results_verbose) = dm.score_2afc_dataset(data_loader,model.forward)
+		(score, results_verbose) = dm.score_2afc_dataset(data_loader, model.forward, name=dataset)
 	elif(opt.dataset_mode=='jnd'):
-		(score, results_verbose) = dm.score_jnd_dataset(data_loader,model.forward)
+		(score, results_verbose) = dm.score_jnd_dataset(data_loader, model.forward, name=dataset)
 
 	# print results
 	print('  Dataset [%s]: %.2f'%(dataset,100.*score))

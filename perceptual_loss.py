@@ -9,7 +9,7 @@ import torch
 from torch.autograd import Variable
 import models
 
-use_gpu = False
+use_gpu = True
 
 ref_path  = './imgs/ex_ref.png'
 pred_path = './imgs/ex_p1.png'
@@ -18,11 +18,8 @@ ref_img = scipy.misc.imread(ref_path).transpose(2, 0, 1) / 255.
 pred_img = scipy.misc.imread(pred_path).transpose(2, 0, 1) / 255.
 
 # Torchify
-ref = Variable(torch.FloatTensor(ref_img).unsqueeze(0), requires_grad=False)
-pred = Variable(torch.FloatTensor(pred_img).unsqueeze(0), requires_grad=True)
-if(use_gpu):
-    ref = ref.cuda()
-    pred = pred.cuda()
+ref = Variable(torch.FloatTensor(ref_img)[None,:,:,:])
+pred = Variable(torch.FloatTensor(pred_img)[None,:,:,:], requires_grad=True)
 
 loss_fn = models.PerceptualLoss(model='net-lin', net='vgg', use_gpu=use_gpu)
 optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
@@ -32,10 +29,10 @@ plt.ion()
 fig = plt.figure(1)
 ax = fig.add_subplot(131)
 ax.imshow(ref_img.transpose(1, 2, 0))
-ax.set_title('reference')
+ax.set_title('target')
 ax = fig.add_subplot(133)
 ax.imshow(pred_img.transpose(1, 2, 0))
-ax.set_title('orig pred')
+ax.set_title('initialization')
 
 for i in range(1000):
     dist = loss_fn.forward(pred, ref, normalize=True)

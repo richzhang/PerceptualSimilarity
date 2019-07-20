@@ -19,16 +19,11 @@ import models as util
 # Off-the-shelf deep network
 class PNet(nn.Module):
     '''Pre-trained network with all channels equally weighted by default'''
-    def __init__(self, pnet_type='vgg', pnet_rand=False, use_gpu=True):
+    def __init__(self, pnet_type='vgg', pnet_rand=False):
         super(PNet, self).__init__()
-
-        self.use_gpu = use_gpu
 
         self.pnet_type = pnet_type
         self.pnet_rand = pnet_rand
-
-        self.shift = torch.autograd.Variable(torch.Tensor([-.030, -.088, -.188]).view(1,3,1,1))
-        self.scale = torch.autograd.Variable(torch.Tensor([.458, .448, .450]).view(1,3,1,1))
         
         if(self.pnet_type in ['vgg','vgg16']):
             self.net = pn.vgg16(pretrained=not self.pnet_rand,requires_grad=False)
@@ -39,16 +34,12 @@ class PNet(nn.Module):
         elif(self.pnet_type=='squeeze'):
             self.net = pn.squeezenet(pretrained=not self.pnet_rand,requires_grad=False)
 
+        self.scaling_layer = ScalingLayer()
         self.L = self.net.N_slices
 
-        if(use_gpu):
-            self.net.cuda()
-            self.shift = self.shift.cuda()
-            self.scale = self.scale.cuda()
-
     def forward(self, in0, in1, retPerLayer=False):
-        in0_sc = (in0 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
-        in1_sc = (in1 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
+        in0_sc = self.scaling_layer(in0)
+        in1_sc = self.scaling_layer(in1)
 
         outs0 = self.net.forward(in0_sc)
         outs1 = self.net.forward(in1_sc)
@@ -71,10 +62,9 @@ class PNet(nn.Module):
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, use_gpu=True, spatial=False, version='0.1'):
+    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, spatial=False, version='0.1'):
         super(PNetLin, self).__init__()
 
-        self.use_gpu = use_gpu
         self.pnet_type = pnet_type
         self.pnet_tune = pnet_tune
         self.pnet_rand = pnet_rand
@@ -91,10 +81,8 @@ class PNetLin(nn.Module):
             net_type = pn.squeezenet
             self.chns = [64,128,256,384,384,512,512]
 
-        if(self.pnet_tune):
-            self.net = net_type(pretrained=not self.pnet_rand,requires_grad=True)
-        else:
-            self.net = [net_type(pretrained=not self.pnet_rand,requires_grad=False),]
+        self.scaling_layer = ScalingLayer()
+        self.net = net_type(pretrained=not self.pnet_rand,requires_grad=self.pnet_tune)
 
         self.lin0 = NetLinLayer(self.chns[0],use_dropout=use_dropout)
         self.lin1 = NetLinLayer(self.chns[1],use_dropout=use_dropout)
@@ -107,44 +95,19 @@ class PNetLin(nn.Module):
             self.lin6 = NetLinLayer(self.chns[6],use_dropout=use_dropout)
             self.lins+=[self.lin5,self.lin6]
 
-        self.shift = torch.autograd.Variable(torch.Tensor([-.030, -.088, -.188]).view(1,3,1,1))
-        self.scale = torch.autograd.Variable(torch.Tensor([.458, .448, .450]).view(1,3,1,1))
-
-        if(use_gpu):
-            if(self.pnet_tune):
-                self.net.cuda()
-            else:
-                self.net[0].cuda()
-            self.shift = self.shift.cuda()
-            self.scale = self.scale.cuda()
-            self.lin0.cuda()
-            self.lin1.cuda()
-            self.lin2.cuda()
-            self.lin3.cuda()
-            self.lin4.cuda()
-            if(self.pnet_type=='squeeze'):
-                self.lin5.cuda()
-                self.lin6.cuda()
-
     def forward(self, in0, in1):
-        in0_sc = (in0 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
-        in1_sc = (in1 - self.shift.expand_as(in0))/self.scale.expand_as(in0)
+        in0_sc = self.scaling_layer(in0)
+        in1_sc = self.scaling_layer(in1)
 
-        if(self.version=='0.0'):
-            # v0.0 - original release had a bug, where input was not scaled
+        if(self.version=='0.0'): # v0.0 - original release had a bug, where input was not scaled
             in0_input = in0
             in1_input = in1
-        else:
-            # v0.1
+        else: # v0.1
             in0_input = in0_sc
             in1_input = in1_sc
 
-        if(self.pnet_tune):
-            outs0 = self.net.forward(in0_input)
-            outs1 = self.net.forward(in1_input)
-        else:
-            outs0 = self.net[0].forward(in0_input)
-            outs1 = self.net[0].forward(in1_input)
+        outs0 = self.net.forward(in0_input)
+        outs1 = self.net.forward(in1_input)
 
         feats0 = {}
         feats1 = {}
@@ -175,10 +138,31 @@ class PNetLin(nn.Module):
 
         return val
 
+class ScalingLayer(nn.Module):
+    def __init__(self):
+        super(ScalingLayer, self).__init__()
+        self.register_buffer('shift', torch.Tensor([-.030,-.088,-.188])[None,:,None,None])
+        self.register_buffer('scale', torch.Tensor([.458,.448,.450])[None,:,None,None])
+
+    def forward(self, inp):
+        return (inp - self.shift.expand_as(inp)) / self.scale.expand_as(inp)
+
+
+class NetLinLayer(nn.Module):
+    ''' A single linear layer which does a 1x1 conv '''
+    def __init__(self, chn_in, chn_out=1, use_dropout=False):
+        super(NetLinLayer, self).__init__()
+
+        layers = [nn.Dropout(),] if(use_dropout) else []
+        layers += [nn.Conv2d(chn_in, chn_out, 1, stride=1, padding=0, bias=False),]
+        self.model = nn.Sequential(*layers)
+
+
 class Dist2LogitLayer(nn.Module):
     ''' takes 2 distances, puts through fc layers, spits out value between [0,1] (if use_sigmoid is True) '''
-    def __init__(self, chn_mid=32,use_sigmoid=True):
+    def __init__(self, chn_mid=32, use_sigmoid=True):
         super(Dist2LogitLayer, self).__init__()
+
         layers = [nn.Conv2d(5, chn_mid, 1, stride=1, padding=0, bias=True),]
         layers += [nn.LeakyReLU(0.2,True),]
         layers += [nn.Conv2d(chn_mid, chn_mid, 1, stride=1, padding=0, bias=True),]
@@ -192,33 +176,16 @@ class Dist2LogitLayer(nn.Module):
         return self.model.forward(torch.cat((d0,d1,d0-d1,d0/(d1+eps),d1/(d0+eps)),dim=1))
 
 class BCERankingLoss(nn.Module):
-    def __init__(self, use_gpu=True, chn_mid=32):
+    def __init__(self, chn_mid=32):
         super(BCERankingLoss, self).__init__()
-        self.use_gpu = use_gpu
         self.net = Dist2LogitLayer(chn_mid=chn_mid)
-        self.parameters = list(self.net.parameters())
+        # self.parameters = list(self.net.parameters())
         self.loss = torch.nn.BCELoss()
-        self.model = nn.Sequential(*[self.net])
-
-        if(self.use_gpu):
-            self.net.cuda()
 
     def forward(self, d0, d1, judge):
         per = (judge+1.)/2.
-        if(self.use_gpu):
-            per = per.cuda()
         self.logit = self.net.forward(d0,d1)
         return self.loss(self.logit, per)
-
-class NetLinLayer(nn.Module):
-    ''' A single linear layer which does a 1x1 conv '''
-    def __init__(self, chn_in, chn_out=1, use_dropout=False):
-        super(NetLinLayer, self).__init__()
-
-        layers = [nn.Dropout(),] if(use_dropout) else []
-        layers += [nn.Conv2d(chn_in, chn_out, 1, stride=1, padding=0, bias=False),]
-        self.model = nn.Sequential(*layers)
-
 
 # L2, DSSIM metrics
 class FakeNet(nn.Module):

@@ -16,6 +16,8 @@ from scipy.ndimage import zoom
 import fractions
 import functools
 import skimage.transform
+from tqdm import tqdm
+
 from IPython import embed
 
 from . import networks_basic as networks
@@ -27,7 +29,7 @@ class DistModel(BaseModel):
 
     def initialize(self, model='net-lin', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
             use_gpu=True, printNet=False, spatial=False, spatial_shape=None, spatial_order=1, spatial_factor=None,
-            is_train=False, lr=.0001, beta1=0.5, version='0.1'):
+            is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0]):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -46,13 +48,13 @@ class DistModel(BaseModel):
             is_train - bool - [True] for training mode
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
-            version - 0.1 for latest, 0.0 was original
+            version - 0.1 for latest, 0.0 was original (with a bug)
+            gpu_ids - int array - [0] by default, gpus to use
         '''
-        BaseModel.initialize(self, use_gpu=use_gpu)
+        BaseModel.initialize(self, use_gpu=use_gpu, gpu_ids=gpu_ids)
 
         self.model = model
         self.net = net
-        self.use_gpu = use_gpu
         self.is_train = is_train
         self.spatial = spatial
         self.spatial_shape = spatial_shape
@@ -61,7 +63,8 @@ class DistModel(BaseModel):
 
         self.model_name = '%s [%s]'%(model,net)
         if(self.model == 'net-lin'): # pretrained net + linear layer
-            self.net = networks.PNetLin(use_gpu=use_gpu,pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,use_dropout=True,spatial=spatial,version=version)
+            self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,
+                use_dropout=True, spatial=spatial, version=version)
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
@@ -71,11 +74,11 @@ class DistModel(BaseModel):
 
             if(not is_train):
                 print('Loading model from: %s'%model_path)
-                self.net.load_state_dict(torch.load(model_path, **kw))
+                self.net.load_state_dict(torch.load(model_path, **kw), strict=False)
 
         elif(self.model=='net'): # pretrained network
             assert not self.spatial, 'spatial argument not supported yet for uncalibrated networks'
-            self.net = networks.PNet(use_gpu=use_gpu,pnet_type=net)
+            self.net = networks.PNet(pnet_type=net)
             self.is_fake_net = True
         elif(self.model in ['L2','l2']):
             self.net = networks.L2(use_gpu=use_gpu,colorspace=colorspace) # not really a network, only for testing
@@ -90,13 +93,19 @@ class DistModel(BaseModel):
 
         if self.is_train: # training mode
             # extra network on top to go from distances (d0,d1) => predicted human judgment (h*)
-            self.rankLoss = networks.BCERankingLoss(use_gpu=use_gpu)
-            self.parameters+=self.rankLoss.parameters
+            self.rankLoss = networks.BCERankingLoss()
+            self.parameters += list(self.rankLoss.net.parameters())
             self.lr = lr
             self.old_lr = lr
             self.optimizer_net = torch.optim.Adam(self.parameters, lr=lr, betas=(beta1, 0.999))
         else: # test mode
             self.net.eval()
+
+        if(use_gpu):
+            self.net.to(gpu_ids[0])
+            self.net = torch.nn.DataParallel(self.net, device_ids=gpu_ids)
+            if(self.is_train):
+                self.rankLoss = self.rankLoss.to(device=gpu_ids[0]) # just put this on GPU0
 
         if(printNet):
             print('---------- Networks initialized -------------')
@@ -122,8 +131,8 @@ class DistModel(BaseModel):
         self.input_p0 = in1
 
         if(self.use_gpu):
-            self.input_ref = self.input_ref.cuda()
-            self.input_p0 = self.input_p0.cuda()
+            self.input_ref = self.input_ref.to(device=self.gpu_ids[0])
+            self.input_p0 = self.input_p0.to(device=self.gpu_ids[0])
 
         self.var_ref = Variable(self.input_ref,requires_grad=True)
         self.var_p0 = Variable(self.input_p0,requires_grad=True)
@@ -179,24 +188,27 @@ class DistModel(BaseModel):
         self.input_judge = data['judge']
 
         if(self.use_gpu):
-            self.input_ref = self.input_ref.cuda()
-            self.input_p0 = self.input_p0.cuda()
-            self.input_p1 = self.input_p1.cuda()
-            self.input_judge = self.input_judge.cuda()
+            self.input_ref = self.input_ref.to(device=self.gpu_ids[0])
+            self.input_p0 = self.input_p0.to(device=self.gpu_ids[0])
+            self.input_p1 = self.input_p1.to(device=self.gpu_ids[0])
+            self.input_judge = self.input_judge.to(device=self.gpu_ids[0])
 
         self.var_ref = Variable(self.input_ref,requires_grad=True)
         self.var_p0 = Variable(self.input_p0,requires_grad=True)
         self.var_p1 = Variable(self.input_p1,requires_grad=True)
 
     def forward_train(self): # run forward pass
+        # print(self.net.module.scaling_layer.shift)
+        # print(torch.norm(self.net.module.net.slice1[0].weight).item(), torch.norm(self.net.module.lin0.model[1].weight).item())
+
         self.d0 = self.forward_pair(self.var_ref, self.var_p0)
         self.d1 = self.forward_pair(self.var_ref, self.var_p1)
         self.acc_r = self.compute_accuracy(self.d0,self.d1,self.input_judge)
 
-        # var_judge
         self.var_judge = Variable(1.*self.input_judge).view(self.d0.size())
 
         self.loss_total = self.rankLoss.forward(self.d0, self.d1, self.var_judge*2.-1.)
+
         return self.loss_total
 
     def backward_train(self):
@@ -233,7 +245,10 @@ class DistModel(BaseModel):
                             ('p1', p1_img_vis)])
 
     def save(self, path, label):
-        self.save_network(self.net, path, '', label)
+        if(self.use_gpu):
+            self.save_network(self.net.module, path, '', label)
+        else:
+            self.save_network(self.net, path, '', label)
         self.save_network(self.rankLoss.net, path, 'rank', label)
 
     def update_learning_rate(self,nepoch_decay):
@@ -248,7 +263,7 @@ class DistModel(BaseModel):
 
 
 
-def score_2afc_dataset(data_loader,func):
+def score_2afc_dataset(data_loader, func, name=''):
     ''' Function computes Two Alternative Forced Choice (2AFC) score using
         distance function 'func' in dataset 'data_loader'
     INPUTS
@@ -271,12 +286,10 @@ def score_2afc_dataset(data_loader,func):
     d1s = []
     gts = []
 
-    # bar = pb.ProgressBar(max_value=data_loader.load_data().__len__())
-    for (i,data) in enumerate(data_loader.load_data()):
+    for data in tqdm(data_loader.load_data(), desc=name):
         d0s+=func(data['ref'],data['p0']).tolist()
         d1s+=func(data['ref'],data['p1']).tolist()
         gts+=data['judge'].cpu().numpy().flatten().tolist()
-        # bar.update(i)
 
     d0s = np.array(d0s)
     d1s = np.array(d1s)
@@ -285,7 +298,7 @@ def score_2afc_dataset(data_loader,func):
 
     return(np.mean(scores), dict(d0s=d0s,d1s=d1s,gts=gts,scores=scores))
 
-def score_jnd_dataset(data_loader,func):
+def score_jnd_dataset(data_loader, func, name=''):
     ''' Function computes JND score using distance function 'func' in dataset 'data_loader'
     INPUTS
         data_loader - CustomDatasetDataLoader object - contains a JNDDataset inside
@@ -303,11 +316,9 @@ def score_jnd_dataset(data_loader,func):
     ds = []
     gts = []
 
-    # bar = pb.ProgressBar(max_value=data_loader.load_data().__len__())
-    for (i,data) in enumerate(data_loader.load_data()):
+    for data in tqdm(data_loader.load_data(), desc=name):
         ds+=func(data['p0'],data['p1']).tolist()
         gts+=data['same'].cpu().numpy().flatten().tolist()
-        # bar.update(i)
 
     sames = np.array(gts)
     ds = np.array(ds)
