@@ -56,8 +56,8 @@ class DistModel(BaseModel):
         self.is_train = is_train
         self.spatial = spatial
         self.gpu_ids = gpu_ids
-
         self.model_name = '%s [%s]'%(model,net)
+
         if(self.model == 'net-lin'): # pretrained net + linear layer
             self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,
                 use_dropout=True, spatial=spatial, version=version, lpips=True)
