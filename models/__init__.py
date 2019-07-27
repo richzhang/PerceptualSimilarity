@@ -6,8 +6,8 @@ from __future__ import print_function
 import numpy as np
 from skimage.measure import compare_ssim
 import torch
+from torch.autograd import Variable
 
-import torch
 from models import dist_model
 
 class PerceptualLoss(torch.nn.Module):
@@ -17,6 +17,7 @@ class PerceptualLoss(torch.nn.Module):
         print('Setting up Perceptual loss...')
         self.use_gpu = use_gpu
         self.spatial = spatial
+        self.gpu_ids = gpu_ids
         self.model = dist_model.DistModel()
         self.model.initialize(model=model, net=net, use_gpu=use_gpu, colorspace=colorspace, spatial=self.spatial, gpu_ids=gpu_ids)
         print('...[%s] initialized'%self.model.name())
@@ -37,32 +38,14 @@ class PerceptualLoss(torch.nn.Module):
             pred = 2 * pred  - 1
 
         if(self.use_gpu):
-            target = target.cuda()
-            pred = pred.cuda()
+            target = Variable(target.to(device=self.gpu_ids[0]), requires_grad=True)
+            pred = Variable(pred.to(device=self.gpu_ids[0]), requires_grad=True)
 
-        if(not self.spatial):
-            return self.model.forward_pair(target, pred)
-        else:
-            return self.model.forward(target, pred)
-
-
-def cos_sim_blob(in0,in1):
-    in0_norm = normalize_blob(in0)
-    in1_norm = normalize_blob(in1)
-    (N,C,X,Y) = in0_norm.shape
-
-    return np.mean(np.mean(np.sum(in0_norm*in1_norm,axis=1),axis=1),axis=1)
+        return self.model.forward(target, pred)
 
 def normalize_tensor(in_feat,eps=1e-10):
     norm_factor = torch.sqrt(torch.sum(in_feat**2,dim=1,keepdim=True))
     return in_feat/(norm_factor+eps)
-
-def cos_sim(in0,in1):
-    in0_norm = normalize_tensor(in0)
-    in1_norm = normalize_tensor(in1)
-    N = in0.size()[0]
-
-    return torch.mean(torch.mean(torch.sum(in0_norm*in1_norm,dim=1,keepdim=True),dim=2,keepdim=True),dim=3,keepdim=True).view(N)
 
 def l2(p0, p1, range=255.):
     return .5*np.mean((p0 / range - p1 / range)**2)
@@ -79,10 +62,6 @@ def rgb2lab(in_img,mean_cent=False):
     if(mean_cent):
         img_lab[:,:,0] = img_lab[:,:,0]-50
     return img_lab
-
-def normalize_blob(in_feat,eps=1e-10):
-    norm_factor = np.sqrt(np.sum(in_feat**2,axis=1,keepdims=True))
-    return in_feat/(norm_factor+eps)
 
 def tensor2np(tensor_obj):
     # change dimension of a tensor object into a numpy array

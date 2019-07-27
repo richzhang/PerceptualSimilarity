@@ -5,7 +5,7 @@ from models import dist_model as dm
 from IPython import embed
 
 use_gpu = False         # Whether to use GPU
-spatial = False         # Return a spatial map of perceptual distance.
+spatial = True         # Return a spatial map of perceptual distance.
 
 # Linearly calibrated models (LPIPS)
 model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, spatial=spatial)
@@ -20,8 +20,8 @@ model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, spat
 # model = models.PerceptualLoss(model='ssim', colorspace='RGB', use_gpu=use_gpu)
 
 ## Example usage with dummy tensors
-dummy_im0 = torch.Tensor(1,3,64,64) # image should be RGB, normalized to [-1,1]
-dummy_im1 = torch.Tensor(1,3,64,64)
+dummy_im0 = torch.zeros(1,3,64,64) # image should be RGB, normalized to [-1,1]
+dummy_im1 = torch.zeros(1,3,64,64)
 dist = model.forward(dummy_im0,dummy_im1)
 
 ## Example usage with images
@@ -38,5 +38,5 @@ else:
     
     # Visualize a spatially-varying distance map between ex_p0 and ex_ref
     import pylab
-    pylab.imshow(ex_d0)
+    pylab.imshow(ex_d0[0,0,...].data.cpu().numpy())
     pylab.show()

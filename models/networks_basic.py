@@ -2,8 +2,6 @@
 from __future__ import absolute_import
 
 import sys
-sys.path.append('..')
-sys.path.append('.')
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -16,59 +14,25 @@ from . import pretrained_networks as pn
 
 import models as util
 
-# Off-the-shelf deep network
-class PNet(nn.Module):
-    '''Pre-trained network with all channels equally weighted by default'''
-    def __init__(self, pnet_type='vgg', pnet_rand=False):
-        super(PNet, self).__init__()
+def spatial_average(in_tens, keepdim=True):
+    return in_tens.mean([2,3],keepdim=keepdim)
 
-        self.pnet_type = pnet_type
-        self.pnet_rand = pnet_rand
-        
-        if(self.pnet_type in ['vgg','vgg16']):
-            self.net = pn.vgg16(pretrained=not self.pnet_rand,requires_grad=False)
-        elif(self.pnet_type=='alex'):
-            self.net = pn.alexnet(pretrained=not self.pnet_rand,requires_grad=False)
-        elif(self.pnet_type[:-2]=='resnet'):
-            self.net = pn.resnet(pretrained=not self.pnet_rand,requires_grad=False, num=int(self.pnet_type[-2:]))
-        elif(self.pnet_type=='squeeze'):
-            self.net = pn.squeezenet(pretrained=not self.pnet_rand,requires_grad=False)
+def upsample(in_tens, out_H=64): # assumes scale factor is same for H and W
+    in_H = in_tens.shape[2]
+    scale_factor = 1.*out_H/in_H
 
-        self.scaling_layer = ScalingLayer()
-        self.L = self.net.N_slices
-
-    def forward(self, in0, in1, retPerLayer=False):
-        in0_sc = self.scaling_layer(in0)
-        in1_sc = self.scaling_layer(in1)
-
-        outs0 = self.net.forward(in0_sc)
-        outs1 = self.net.forward(in1_sc)
-
-        if(retPerLayer):
-            all_scores = []
-        for (kk,out0) in enumerate(outs0):
-            cur_score = (1.-util.cos_sim(outs0[kk],outs1[kk]))
-            if(kk==0):
-                val = 1.*cur_score
-            else:
-                val = val + cur_score
-            if(retPerLayer):
-                all_scores+=[cur_score]
-
-        if(retPerLayer):
-            return (val, all_scores)
-        else:
-            return val
+    return nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=False)(in_tens)
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, spatial=False, version='0.1'):
+    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, spatial=False, version='0.1', lpips=True):
         super(PNetLin, self).__init__()
 
         self.pnet_type = pnet_type
         self.pnet_tune = pnet_tune
         self.pnet_rand = pnet_rand
         self.spatial = spatial
+        self.lpips = lpips
         self.version = version
 
         if(self.pnet_type in ['vgg','vgg16']):
@@ -80,63 +44,55 @@ class PNetLin(nn.Module):
         elif(self.pnet_type=='squeeze'):
             net_type = pn.squeezenet
             self.chns = [64,128,256,384,384,512,512]
+        self.L = len(self.chns)
 
         self.scaling_layer = ScalingLayer()
-        self.net = net_type(pretrained=not self.pnet_rand,requires_grad=self.pnet_tune)
+        self.net = net_type(pretrained=not self.pnet_rand, requires_grad=self.pnet_tune)
 
-        self.lin0 = NetLinLayer(self.chns[0],use_dropout=use_dropout)
-        self.lin1 = NetLinLayer(self.chns[1],use_dropout=use_dropout)
-        self.lin2 = NetLinLayer(self.chns[2],use_dropout=use_dropout)
-        self.lin3 = NetLinLayer(self.chns[3],use_dropout=use_dropout)
-        self.lin4 = NetLinLayer(self.chns[4],use_dropout=use_dropout)
-        self.lins = [self.lin0,self.lin1,self.lin2,self.lin3,self.lin4]
-        if(self.pnet_type=='squeeze'): # 7 layers for squeezenet
-            self.lin5 = NetLinLayer(self.chns[5],use_dropout=use_dropout)
-            self.lin6 = NetLinLayer(self.chns[6],use_dropout=use_dropout)
-            self.lins+=[self.lin5,self.lin6]
+        if(lpips):
+            self.lin0 = NetLinLayer(self.chns[0], use_dropout=use_dropout)
+            self.lin1 = NetLinLayer(self.chns[1], use_dropout=use_dropout)
+            self.lin2 = NetLinLayer(self.chns[2], use_dropout=use_dropout)
+            self.lin3 = NetLinLayer(self.chns[3], use_dropout=use_dropout)
+            self.lin4 = NetLinLayer(self.chns[4], use_dropout=use_dropout)
+            self.lins = [self.lin0,self.lin1,self.lin2,self.lin3,self.lin4]
+            if(self.pnet_type=='squeeze'): # 7 layers for squeezenet
+                self.lin5 = NetLinLayer(self.chns[5], use_dropout=use_dropout)
+                self.lin6 = NetLinLayer(self.chns[6], use_dropout=use_dropout)
+                self.lins+=[self.lin5,self.lin6]
 
-    def forward(self, in0, in1):
-        in0_sc = self.scaling_layer(in0)
-        in1_sc = self.scaling_layer(in1)
+    def forward(self, in0, in1, retPerLayer=False):
+        in0_sc, in1_sc = self.scaling_layer(in0), self.scaling_layer(in1)
 
-        if(self.version=='0.0'): # v0.0 - original release had a bug, where input was not scaled
-            in0_input = in0
-            in1_input = in1
-        else: # v0.1
-            in0_input = in0_sc
-            in1_input = in1_sc
+        # v0.0 - original release had a bug, where input was not scaled
+        in0_input, in1_input = (in0_sc, in1_sc) if self.version=='0.1' else (in0, in1)
 
-        outs0 = self.net.forward(in0_input)
-        outs1 = self.net.forward(in1_input)
-
-        feats0 = {}
-        feats1 = {}
-        diffs = [0]*len(outs0)
+        outs0, outs1 = self.net.forward(in0_input), self.net.forward(in1_input)
+        feats0, feats1, diffs = {}, {}, {}
 
         for (kk,out0) in enumerate(outs0):
-            feats0[kk] = util.normalize_tensor(outs0[kk])
-            feats1[kk] = util.normalize_tensor(outs1[kk])
+            feats0[kk], feats1[kk] = util.normalize_tensor(outs0[kk]), util.normalize_tensor(outs1[kk])
             diffs[kk] = (feats0[kk]-feats1[kk])**2
 
-        if self.spatial:
-            lin_models = [self.lin0, self.lin1, self.lin2, self.lin3, self.lin4]
-            if(self.pnet_type=='squeeze'):
-                lin_models.extend([self.lin5, self.lin6])
-            res = [lin_models[kk].model(diffs[kk]) for kk in range(len(diffs))]
-            return res
-			
-        val = torch.mean(torch.mean(self.lin0.model(diffs[0]),dim=3),dim=2)
-        val = val + torch.mean(torch.mean(self.lin1.model(diffs[1]),dim=3),dim=2)
-        val = val + torch.mean(torch.mean(self.lin2.model(diffs[2]),dim=3),dim=2)
-        val = val + torch.mean(torch.mean(self.lin3.model(diffs[3]),dim=3),dim=2)
-        val = val + torch.mean(torch.mean(self.lin4.model(diffs[4]),dim=3),dim=2)
-        if(self.pnet_type=='squeeze'):
-            val = val + torch.mean(torch.mean(self.lin5.model(diffs[5]),dim=3),dim=2)
-            val = val + torch.mean(torch.mean(self.lin6.model(diffs[6]),dim=3),dim=2)
+        if(self.lpips):
+            if(self.spatial):
+                res = [upsample(self.lins[kk].model(diffs[kk]), out_H=in0.shape[2]) for kk in range(self.L)]
+            else:
+                res = [spatial_average(self.lins[kk].model(diffs[kk]), keepdim=True) for kk in range(self.L)]
+        else:
+            if(self.spatial):
+                res = [upsample(diffs[kk].sum(dim=1,keepdim=True), out_H=in0.shape[2]) for kk in range(self.L)]
+            else:
+                res = [spatial_average(diffs[kk].sum(dim=1,keepdim=True), keepdim=True) for kk in range(self.L)]
 
-        val = val.view(val.size()[0],val.size()[1],1,1)
-
-        return val
+        val = res[0]
+        for l in range(1,self.L):
+            val += res[l]
+        
+        if(retPerLayer):
+            return (val, res)
+        else:
+            return val
 
 class ScalingLayer(nn.Module):
     def __init__(self):
@@ -196,7 +152,7 @@ class FakeNet(nn.Module):
 
 class L2(FakeNet):
 
-    def forward(self, in0, in1):
+    def forward(self, in0, in1, retPerLayer=None):
         assert(in0.size()[0]==1) # currently only supports batchSize 1
 
         if(self.colorspace=='RGB'):
@@ -213,7 +169,7 @@ class L2(FakeNet):
 
 class DSSIM(FakeNet):
 
-    def forward(self, in0, in1):
+    def forward(self, in0, in1, retPerLayer=None):
         assert(in0.size()[0]==1) # currently only supports batchSize 1
 
         if(self.colorspace=='RGB'):
