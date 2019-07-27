@@ -27,7 +27,8 @@ class DistModel(BaseModel):
 
     def initialize(self, model='net-lin', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
             use_gpu=True, printNet=False, spatial=False, 
-            is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0]):
+            is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0],
+            dist='L2', normalize=True):
         '''
         INPUTS
             model - ['net-lin'] for linearly calibrated network
@@ -40,14 +41,13 @@ class DistModel(BaseModel):
             use_gpu - bool - whether or not to use a GPU
             printNet - bool - whether or not to print network architecture out
             spatial - bool - whether to output an array containing varying distances across spatial dimensions
-            spatial_shape - if given, output spatial shape. if None then spatial shape is determined automatically via spatial_factor (see below).
-            spatial_factor - if given, specifies upsampling factor relative to the largest spatial extent of a convolutional layer. if None then resized to size of input images.
-            spatial_order - spline order of filter for upsampling in spatial mode, by default 1 (bilinear).
             is_train - bool - [True] for training mode
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
             version - 0.1 for latest, 0.0 was original (with a bug)
             gpu_ids - int array - [0] by default, gpus to use
+            dist - str - ['L2','L1']
+            normalize - bool - whether to unit normalize each spatial location or not (dist='L2', normalize=True is cosine distance)
         '''
         BaseModel.initialize(self, use_gpu=use_gpu, gpu_ids=gpu_ids)
 
@@ -60,7 +60,8 @@ class DistModel(BaseModel):
 
         if(self.model == 'net-lin'): # pretrained net + linear layer
             self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,
-                use_dropout=True, spatial=spatial, version=version, lpips=True)
+                use_dropout=True, spatial=spatial, version=version, lpips=True,
+                dist=dist, normalize=normalize)
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
@@ -73,7 +74,8 @@ class DistModel(BaseModel):
                 self.net.load_state_dict(torch.load(model_path, **kw), strict=False)
 
         elif(self.model=='net'): # pretrained network
-            self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_type=net, lpips=False)
+            self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_type=net, lpips=False,
+                dist=dist, normalize=normalize)
         elif(self.model in ['L2','l2']):
             self.net = networks.L2(use_gpu=use_gpu,colorspace=colorspace) # not really a network, only for testing
             self.model_name = 'L2'

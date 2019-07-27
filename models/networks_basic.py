@@ -25,7 +25,8 @@ def upsample(in_tens, out_H=64): # assumes scale factor is same for H and W
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, spatial=False, version='0.1', lpips=True):
+    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, spatial=False, version='0.1', lpips=True,
+            dist='L2', normalize=True):
         super(PNetLin, self).__init__()
 
         self.pnet_type = pnet_type
@@ -34,6 +35,8 @@ class PNetLin(nn.Module):
         self.spatial = spatial
         self.lpips = lpips
         self.version = version
+        self.normalize = normalize
+        self.dist = dist
         self.scaling_layer = ScalingLayer()
         self.dense = self.pnet_type[-5:]=='dense'
 
@@ -70,8 +73,15 @@ class PNetLin(nn.Module):
         feats0, feats1, diffs = {}, {}, {}
 
         for kk in range(self.L):
-            feats0[kk], feats1[kk] = util.normalize_tensor(outs0[kk]), util.normalize_tensor(outs1[kk])
-            diffs[kk] = (feats0[kk]-feats1[kk])**2
+            if self.normalize:
+                feats0[kk], feats1[kk] = util.normalize_tensor(outs0[kk]), util.normalize_tensor(outs1[kk])
+            else:
+                feats0[kk], feats1[kk] = 1./self.chns[kk]*outs0[kk], 1./self.chns[kk]*outs1[kk]
+
+            if(self.dist=='L2'):
+                diffs[kk] = (feats0[kk]-feats1[kk])**2
+            elif(self.dist=='L1'):
+                diffs[kk] = torch.abs(feats0[kk]-feats1[kk])
 
         if(self.lpips):
             if(self.spatial):

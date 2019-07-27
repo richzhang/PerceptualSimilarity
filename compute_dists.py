@@ -12,7 +12,8 @@ parser.add_argument('--net', type=str, default='alex')
 opt = parser.parse_args()
 
 ## Initializing the model
-model = models.PerceptualLoss(model=opt.model, net=opt.net, use_gpu=opt.use_gpu)
+model = models.PerceptualLoss(model=opt.model, net=opt.net, use_gpu=opt.use_gpu, 
+	dist=opt.dist, normalize=not opt.no_normalize)
 
 # Load images
 img0 = util.im2tensor(util.load_image(opt.path0)) # RGB image from [-1,1]

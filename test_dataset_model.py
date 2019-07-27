@@ -21,6 +21,10 @@ parser.add_argument('--from_scratch', action='store_true', help='model was initi
 parser.add_argument('--train_trunk', action='store_true', help='model trunk was trained/tuned')
 parser.add_argument('--version', type=str, default='0.1', help='v0.1 is latest, v0.0 was original release')
 
+parser.add_argument('--no_normalize', action='store_true', help='dont normalize activations')
+parser.add_argument('--dist', type=str, default='L2', help='distance function')
+
+
 opt = parser.parse_args()
 if(opt.model in ['l2','ssim']):
 	opt.batch_size = 1
@@ -30,7 +34,8 @@ model = dm.DistModel()
 # model.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
 model.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace, 
 	model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk,
-	version=opt.version, gpu_ids=opt.gpu_ids)
+	version=opt.version, gpu_ids=opt.gpu_ids,
+	dist=opt.dist, normalize=not opt.no_normalize)
 
 if(opt.model in ['net-lin','net']):
 	print('Testing model [%s]-[%s]'%(opt.model,opt.net))

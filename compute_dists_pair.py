@@ -10,11 +10,14 @@ parser.add_argument('-o','--out', type=str, default='./imgs/example_dists.txt')
 parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use GPU')
 parser.add_argument('--model', type=str, default='net-lin')
 parser.add_argument('--net', type=str, default='alex')
+parser.add_argument('--no_normalize', action='store_true', help='dont normalize activations')
+parser.add_argument('--dist', type=str, default='L2', help='distance function')
 
 opt = parser.parse_args()
 
 ## Initializing the model
-model = models.PerceptualLoss(model=opt.model, net=opt.net, use_gpu=opt.use_gpu)
+model = models.PerceptualLoss(model=opt.model, net=opt.net, use_gpu=opt.use_gpu, 
+	dist=opt.dist, normalize=not opt.no_normalize)
 
 # crawl directories
 f = open(opt.out,'w')
