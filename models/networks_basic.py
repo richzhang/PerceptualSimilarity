@@ -35,19 +35,21 @@ class PNetLin(nn.Module):
         self.lpips = lpips
         self.version = version
         self.scaling_layer = ScalingLayer()
+        self.dense = self.pnet_type[-5:]=='dense'
 
-        if(self.pnet_type in ['vgg','vgg16']):
+        if(self.pnet_type in ['vgg','vgg16','vgg-dense','vgg16-dense']):
             net_type = pn.vgg16
             self.chns = [64,128,256,512,512]
-        elif(self.pnet_type=='alex'):
+        elif(self.pnet_type in ['alex', 'alex-dense']):
             net_type = pn.alexnet
             self.chns = [64,192,384,256,256]
         elif(self.pnet_type=='squeeze'):
             net_type = pn.squeezenet
             self.chns = [64,128,256,384,384,512,512]
+
         self.L = len(self.chns)
 
-        self.net = net_type(pretrained=not self.pnet_rand, requires_grad=self.pnet_tune)
+        self.net = net_type(pretrained=not self.pnet_rand, requires_grad=self.pnet_tune, dense=self.dense)
 
         if(lpips):
             self.lin0 = NetLinLayer(self.chns[0], use_dropout=use_dropout)

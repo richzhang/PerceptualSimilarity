@@ -1,6 +1,7 @@
 from collections import namedtuple
 import torch
 from torchvision import models
+from models import models_dense
 from IPython import embed
 
 class squeezenet(torch.nn.Module):
@@ -55,9 +56,13 @@ class squeezenet(torch.nn.Module):
 
 
 class alexnet(torch.nn.Module):
-    def __init__(self, requires_grad=False, pretrained=True):
+    def __init__(self, requires_grad=False, pretrained=True, dense=False):
         super(alexnet, self).__init__()
-        alexnet_pretrained_features = models.alexnet(pretrained=pretrained).features
+        if(not dense):
+            alexnet_pretrained_features = models.alexnet(pretrained=pretrained).features
+        elif(dense):
+            import models_dense.alexnet
+            alexnet_pretrained_features = models_dense.alexnet.alexnet(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -95,9 +100,13 @@ class alexnet(torch.nn.Module):
         return out
 
 class vgg16(torch.nn.Module):
-    def __init__(self, requires_grad=False, pretrained=True):
+    def __init__(self, requires_grad=False, pretrained=True, dense=False):
         super(vgg16, self).__init__()
-        vgg_pretrained_features = models.vgg16(pretrained=pretrained).features
+        if(not dense):
+            vgg_pretrained_features = models.vgg16(pretrained=pretrained).features
+        elif(dense):
+            import models_dense.vgg
+            vgg_pretrained_features = models_dense.vgg.vgg16(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()

@@ -8,11 +8,13 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.add_argument('-d','--dir', type=str, default='./imgs/ex_dir_pair')
 parser.add_argument('-o','--out', type=str, default='./imgs/example_dists.txt')
 parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use GPU')
+parser.add_argument('--model', type=str, default='net-lin')
+parser.add_argument('--net', type=str, default='alex')
 
 opt = parser.parse_args()
 
 ## Initializing the model
-model = models.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu)
+model = models.PerceptualLoss(model=opt.model, net=opt.net, use_gpu=opt.use_gpu)
 
 # crawl directories
 f = open(opt.out,'w')

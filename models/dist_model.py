@@ -66,7 +66,7 @@ class DistModel(BaseModel):
                 kw['map_location'] = 'cpu'
             if(model_path is None):
                 import inspect
-                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', 'weights/v%s/%s.pth'%(version,net)))
+                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', 'weights/v%s/%s.pth'%(version,net.split('-')[0])))
 
             if(not is_train):
                 print('Loading model from: %s'%model_path)
