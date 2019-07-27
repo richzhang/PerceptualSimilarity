@@ -43,6 +43,10 @@ class PNetLin(nn.Module):
         if(self.pnet_type in ['vgg','vgg16','vgg-dense','vgg16-dense']):
             net_type = pn.vgg16
             self.chns = [64,128,256,512,512]
+        elif(self.pnet_type in ['vgg19','vgg19-dense']):
+            net_type = pn.vgg19
+            self.chns = [64,128,256,512,512]
+            self.weights = [1./32, 1./16, 1./8, 1./4, 1.]
         elif(self.pnet_type in ['alex', 'alex-dense']):
             net_type = pn.alexnet
             self.chns = [64,192,384,256,256]
