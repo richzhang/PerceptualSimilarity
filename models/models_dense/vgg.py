@@ -83,7 +83,7 @@ def make_layers(cfg, batch_norm=False, filter_size=1):
             else:
                 layers += [conv2d, nn.ReLU(inplace=True)]
             in_channels = v
-    print layers
+    # print layers
     return nn.Sequential(*layers)
 
 

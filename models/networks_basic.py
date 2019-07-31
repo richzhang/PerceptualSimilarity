@@ -87,6 +87,7 @@ class PNetLin(nn.Module):
             elif(self.dist=='L1'):
                 diffs[kk] = torch.abs(feats0[kk]-feats1[kk])
 
+        # embed()
         if(self.lpips):
             if(self.spatial):
                 res = [upsample(self.lins[kk].model(diffs[kk]), out_H=in0.shape[2]) for kk in range(self.L)]
