@@ -67,10 +67,15 @@ def make_layers(cfg, batch_norm=False, filter_size=1):
     layers = []
     in_channels = 3
     dil_accum = 1
+    first_ds = True
     for v in cfg:
         if v == 'M':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=1)]
-            dil_accum *= 2
+            if(first_ds):
+                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+                first_ds = False
+            else:
+                layers += [nn.MaxPool2d(kernel_size=2, stride=1)]
+                dil_accum *= 2
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=dil_accum, dilation=dil_accum)
             if batch_norm:
