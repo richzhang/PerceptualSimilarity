@@ -16,6 +16,11 @@ model = models.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu)
 img0 = util.im2tensor(util.load_image(opt.path0)) # RGB image from [-1,1]
 img1 = util.im2tensor(util.load_image(opt.path1))
 
+if(opt.use_gpu):
+	img1 = img0.cuda()
+	img1 = img1.cuda()
+
+
 # Compute distance
 dist01 = model.forward(img0,img1)
 print('Distance: %.3f'%dist01)

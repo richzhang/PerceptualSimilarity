@@ -24,6 +24,10 @@ for file in files:
 		img0 = util.im2tensor(util.load_image(os.path.join(opt.dir0,file))) # RGB image from [-1,1]
 		img1 = util.im2tensor(util.load_image(os.path.join(opt.dir1,file)))
 
+		if(opt.use_gpu):
+			img0 = img0.cuda()
+			img1 = img1.cuda()
+
 		# Compute distance
 		dist01 = model.forward(img0,img1)
 		print('%s: %.3f'%(file,dist01))

@@ -1,12 +1,12 @@
 from collections import namedtuple
 import torch
-from torchvision import models
+from torchvision import models as tv
 from IPython import embed
 
 class squeezenet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
         super(squeezenet, self).__init__()
-        pretrained_features = models.squeezenet1_1(pretrained=pretrained).features
+        pretrained_features = tv.squeezenet1_1(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -57,7 +57,7 @@ class squeezenet(torch.nn.Module):
 class alexnet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
         super(alexnet, self).__init__()
-        alexnet_pretrained_features = models.alexnet(pretrained=pretrained).features
+        alexnet_pretrained_features = tv.alexnet(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -97,7 +97,7 @@ class alexnet(torch.nn.Module):
 class vgg16(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
         super(vgg16, self).__init__()
-        vgg_pretrained_features = models.vgg16(pretrained=pretrained).features
+        vgg_pretrained_features = tv.vgg16(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -140,15 +140,15 @@ class resnet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True, num=18):
         super(resnet, self).__init__()
         if(num==18):
-            self.net = models.resnet18(pretrained=pretrained)
+            self.net = tv.resnet18(pretrained=pretrained)
         elif(num==34):
-            self.net = models.resnet34(pretrained=pretrained)
+            self.net = tv.resnet34(pretrained=pretrained)
         elif(num==50):
-            self.net = models.resnet50(pretrained=pretrained)
+            self.net = tv.resnet50(pretrained=pretrained)
         elif(num==101):
-            self.net = models.resnet101(pretrained=pretrained)
+            self.net = tv.resnet101(pretrained=pretrained)
         elif(num==152):
-            self.net = models.resnet152(pretrained=pretrained)
+            self.net = tv.resnet152(pretrained=pretrained)
         self.N_slices = 5
 
         self.conv1 = self.net.conv1

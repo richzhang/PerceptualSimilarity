@@ -21,8 +21,13 @@ files = os.listdir(opt.dir)
 dists = []
 for (ff,file0) in enumerate(files[:-1]):
 	img0 = util.im2tensor(util.load_image(os.path.join(opt.dir,file0))) # RGB image from [-1,1]
+	if(opt.use_gpu):
+		img0 = img0.cuda()
+
 	for (gg,file1) in enumerate(files[ff+1:]):
 		img1 = util.im2tensor(util.load_image(os.path.join(opt.dir,file1)))
+		if(opt.use_gpu):
+			img1 = img1.cuda()
 
 		# Compute distance
 		dist01 = model.forward(img0,img1).item()

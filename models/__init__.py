@@ -37,10 +37,6 @@ class PerceptualLoss(torch.nn.Module):
             target = 2 * target  - 1
             pred = 2 * pred  - 1
 
-        if(self.use_gpu):
-            target = Variable(target.to(device=self.gpu_ids[0]), requires_grad=True)
-            pred = Variable(pred.to(device=self.gpu_ids[0]), requires_grad=True)
-
         return self.model.forward(target, pred)
 
 def normalize_tensor(in_feat,eps=1e-10):
