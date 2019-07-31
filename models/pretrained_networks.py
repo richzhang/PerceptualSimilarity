@@ -1,6 +1,6 @@
 from collections import namedtuple
 import torch
-from torchvision import tv
+from torchvision import models as tv
 from models import models_dense
 from IPython import embed
 
