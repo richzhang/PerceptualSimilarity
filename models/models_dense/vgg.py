@@ -74,7 +74,7 @@ def make_layers(cfg, batch_norm=False, filter_size=1):
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
                 first_ds = False
             else:
-                layers += [nn.MaxPool2d(kernel_size=2, stride=1, dilation=dil_accum/2)]
+                layers += [nn.MaxPool2d(kernel_size=2, stride=1, dilation=dil_accum, padding=dil_accum/2)]
                 dil_accum *= 2
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=dil_accum, dilation=dil_accum)
