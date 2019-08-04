@@ -23,7 +23,7 @@ This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)
 ## (0) Dependencies/Setup
 
 ### Installation
-- Install PyTorch 0.4+ and torchvision fom http://pytorch.org
+- Install PyTorch 1.0+ and torchvision fom http://pytorch.org
 
 ```bash
 pip install -r requirements.txt
