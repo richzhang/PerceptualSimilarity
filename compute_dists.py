@@ -17,7 +17,7 @@ img0 = util.im2tensor(util.load_image(opt.path0)) # RGB image from [-1,1]
 img1 = util.im2tensor(util.load_image(opt.path1))
 
 if(opt.use_gpu):
-	img1 = img0.cuda()
+	img0 = img0.cuda()
 	img1 = img1.cuda()
 
 
