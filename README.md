@@ -36,7 +36,7 @@ cd PerceptualSimilarity
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
 
-Evaluate the distance between image patches. Higher means further/more different.
+Evaluate the distance between image patches. **Higher means further/more different. Lower means more similar.**
 
 ### (A) Basic Usage
 
