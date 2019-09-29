@@ -74,6 +74,8 @@ File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimiz
 
 ### (C) About the metric
 
+**Higher means further/more different. Lower means more similar.**
+
 We found that deep network activations work surprisingly well as a perceptual similarity metric. This was true across network architectures (SqueezeNet [2.8 MB], AlexNet [9.1 MB], and VGG [58.9 MB] provided similar scores) and supervisory signals (unsupervised, self-supervised, and supervised all perform strongly). We slightly improved scores by linearly "calibrating" networks - adding a linear layer on top of off-the-shelf classification networks. We provide 3 variants, using linear layers on top of the SqueezeNet, AlexNet (default), and VGG networks.
 
 **If you use LPIPS in your publication, please specify which version you are using.** The current version is 0.1. You can set `version='0.0'` for the initial release.
