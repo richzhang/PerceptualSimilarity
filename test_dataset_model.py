@@ -1,5 +1,5 @@
 import numpy as np
-from models import dist_model as dm
+from perceptual_similarity import dist_model as dm
 from data import data_loader as dl
 import argparse
 from IPython import embed

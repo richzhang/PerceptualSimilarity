@@ -12,7 +12,7 @@ from skimage import color
 from IPython import embed
 from . import pretrained_networks as pn
 
-import models as util
+import perceptual_similarity as util
 
 def spatial_average(in_tens, keepdim=True):
     return in_tens.mean([2,3],keepdim=keepdim)

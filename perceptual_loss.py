@@ -7,7 +7,7 @@ import scipy.misc
 import numpy as np
 import torch
 from torch.autograd import Variable
-import models
+import perceptual_similarity
 
 use_gpu = True
 
@@ -21,7 +21,7 @@ pred_img = scipy.misc.imread(pred_path).transpose(2, 0, 1) / 255.
 ref = Variable(torch.FloatTensor(ref_img)[None,:,:,:])
 pred = Variable(torch.FloatTensor(pred_img)[None,:,:,:], requires_grad=True)
 
-loss_fn = models.PerceptualLoss(model='net-lin', net='vgg', use_gpu=use_gpu)
+loss_fn = perceptual_similarity.PerceptualLoss(model='net-lin', net='vgg', use_gpu=use_gpu)
 optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
 
 import matplotlib.pyplot as plt

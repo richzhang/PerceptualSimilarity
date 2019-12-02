@@ -1,6 +1,6 @@
 import argparse
 import os
-import models
+import perceptual_similarity
 import numpy as np
 from util import util
 
@@ -12,7 +12,7 @@ parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use 
 opt = parser.parse_args()
 
 ## Initializing the model
-model = models.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu)
+model = perceptual_similarity.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu)
 
 # crawl directories
 f = open(opt.out,'w')

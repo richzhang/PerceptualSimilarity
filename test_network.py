@@ -1,14 +1,14 @@
 import torch
 from util import util
-import models
-from models import dist_model as dm
+import perceptual_similarity
+from perceptual_similarity import dist_model as dm
 from IPython import embed
 
 use_gpu = False         # Whether to use GPU
 spatial = True         # Return a spatial map of perceptual distance.
 
 # Linearly calibrated models (LPIPS)
-model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, spatial=spatial)
+model = perceptual_similarity.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, spatial=spatial)
 	# Can also set net = 'squeeze' or 'vgg'
 
 # Off-the-shelf uncalibrated networks

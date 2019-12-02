@@ -1,5 +1,5 @@
 import argparse
-import models
+import perceptual_similarity
 from util import util
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -10,7 +10,7 @@ parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use 
 opt = parser.parse_args()
 
 ## Initializing the model
-model = models.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu)
+model = perceptual_similarity.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu)
 
 # Load images
 img0 = util.im2tensor(util.load_image(opt.path0)) # RGB image from [-1,1]
