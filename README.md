@@ -32,6 +32,7 @@ pip install -r requirements.txt
 ```bash
 git clone https://github.com/richzhang/PerceptualSimilarity
 cd PerceptualSimilarity
+python setup.py install 
 ```
 
 ## (1) Learned Perceptual Image Patch Similarity (LPIPS) metric
