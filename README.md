@@ -56,8 +56,8 @@ python compute_dists_pair.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt 
 File [test_network.py](test_network.py) shows example usage. This snippet is all you really need.
 
 ```python
-import models
-model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, gpu_ids=[0])
+import perceptual_similarity as lpips
+model = lpips.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, gpu_ids=[0])
 d = model.forward(im0,im1)
 ```
 
