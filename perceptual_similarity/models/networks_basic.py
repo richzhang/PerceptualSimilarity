@@ -10,9 +10,10 @@ import numpy as np
 from pdb import set_trace as st
 from skimage import color
 from IPython import embed
-from . import pretrained_networks as pn
 
-import models as util
+from .pretrained_networks import vgg16, alexnet, squeezenet
+from ..util.util import l2, normalize_tensor, tensor2np, tensor2tensorlab, \
+    dssim, tensor2im
 
 def spatial_average(in_tens, keepdim=True):
     return in_tens.mean([2,3],keepdim=keepdim)
@@ -37,13 +38,13 @@ class PNetLin(nn.Module):
         self.scaling_layer = ScalingLayer()
 
         if(self.pnet_type in ['vgg','vgg16']):
-            net_type = pn.vgg16
+            net_type = vgg16
             self.chns = [64,128,256,512,512]
         elif(self.pnet_type=='alex'):
-            net_type = pn.alexnet
+            net_type = alexnet
             self.chns = [64,192,384,256,256]
         elif(self.pnet_type=='squeeze'):
-            net_type = pn.squeezenet
+            net_type = squeezenet
             self.chns = [64,128,256,384,384,512,512]
         self.L = len(self.chns)
 
@@ -68,7 +69,7 @@ class PNetLin(nn.Module):
         feats0, feats1, diffs = {}, {}, {}
 
         for kk in range(self.L):
-            feats0[kk], feats1[kk] = util.normalize_tensor(outs0[kk]), util.normalize_tensor(outs1[kk])
+            feats0[kk], feats1[kk] = normalize_tensor(outs0[kk]), normalize_tensor(outs1[kk])
             diffs[kk] = (feats0[kk]-feats1[kk])**2
 
         if(self.lpips):
@@ -157,8 +158,8 @@ class L2(FakeNet):
             value = torch.mean(torch.mean(torch.mean((in0-in1)**2,dim=1).view(N,1,X,Y),dim=2).view(N,1,1,Y),dim=3).view(N)
             return value
         elif(self.colorspace=='Lab'):
-            value = util.l2(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
-                util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
+            value = l2(tensor2np(tensor2tensorlab(in0.data,to_norm=False)), 
+                tensor2np(tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
             ret_var = Variable( torch.Tensor((value,) ) )
             if(self.use_gpu):
                 ret_var = ret_var.cuda()
@@ -170,10 +171,10 @@ class DSSIM(FakeNet):
         assert(in0.size()[0]==1) # currently only supports batchSize 1
 
         if(self.colorspace=='RGB'):
-            value = util.dssim(1.*util.tensor2im(in0.data), 1.*util.tensor2im(in1.data), range=255.).astype('float')
+            value = dssim(1.*tensor2im(in0.data), 1.*tensor2im(in1.data), range=255.).astype('float')
         elif(self.colorspace=='Lab'):
-            value = util.dssim(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
-                util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
+            value = dssim(tensor2np(tensor2tensorlab(in0.data,to_norm=False)), 
+                tensor2np(tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
         ret_var = Variable( torch.Tensor((value,) ) )
         if(self.use_gpu):
             ret_var = ret_var.cuda()
