@@ -1,8 +1,8 @@
 import argparse
 import os
-import models
+from perceptual_similarity import models
 import numpy as np
-from util import util
+from perceptual_similarity.util import util
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-d','--dir', type=str, default='./imgs/ex_dir_pair')

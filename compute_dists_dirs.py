@@ -1,7 +1,7 @@
 import argparse
 import os
-import models
-from util import util
+from perceptual_similarity import models
+from perceptual_similarity.util import util
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-d0','--dir0', type=str, default='./imgs/ex_dir0')

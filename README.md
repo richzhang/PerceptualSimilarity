@@ -45,9 +45,9 @@ Evaluate the distance between image patches. **Higher means further/more differe
 Example scripts to take the distance between 2 specific images, all corresponding pairs of images in 2 directories, or all pairs of images within a directory:
 
 ```
-python compute_dists.py -p0 imgs/ex_ref.png -p1 imgs/ex_p0.png --use_gpu
-python compute_dists_dirs.py -d0 imgs/ex_dir0 -d1 imgs/ex_dir1 -o imgs/example_dists.txt --use_gpu
-python compute_dists_pair.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt --use_gpu
+python perceptual_similarity/compute_dists.py -p0 imgs/ex_ref.png -p1 imgs/ex_p0.png --use_gpu
+python perceptual_similarity/compute_dists_dirs.py -d0 imgs/ex_dir0 -d1 imgs/ex_dir1 -o imgs/example_dists.txt --use_gpu
+python perceptual_similarity/compute_dists_pair.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt --use_gpu
 ```
 
 #### (A.II) Python code
@@ -55,7 +55,7 @@ python compute_dists_pair.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt 
 File [test_network.py](test_network.py) shows example usage. This snippet is all you really need.
 
 ```python
-import models
+from perceptual_similarity import models
 model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, gpu_ids=[0])
 d = model.forward(im0,im1)
 ```
@@ -70,7 +70,7 @@ Run `python test_network.py` to take the distance between example reference imag
 
 ### (B) Backpropping through the metric
 
-File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights.
+File [`perceptual_loss.py`](perceptual_similarity/perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights.
 
 ### (C) About the metric
 

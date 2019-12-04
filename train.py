@@ -4,10 +4,10 @@ cudnn.benchmark=False
 import numpy as np
 import time
 import os
-from models import dist_model as dm
-from data import data_loader as dl
+from perceptual_similarity.models import dist_model as dm
+from perceptual_similarity.data import data_loader as dl
 import argparse
-from util.visualizer import Visualizer
+from perceptual_similarity.util import Visualizer
 from IPython import embed
 
 parser = argparse.ArgumentParser()
@@ -99,5 +99,4 @@ for epoch in range(1, opt.nepoch + opt.nepoch_decay + 1):
     if epoch > opt.nepoch:
         model.update_learning_rate(opt.nepoch_decay)
 
-# model.save_done(True)
 fid.close()
