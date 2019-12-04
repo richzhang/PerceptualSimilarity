@@ -20,6 +20,17 @@ This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)
    c. [About the dataset](#c-about-the-dataset)<br>
    d. [Train the metric using the dataset](#d-using-the-dataset-to-train-the-metric)<br>
 
+## Install as a package
+
+`pip install perceptual-similarity-pytorch`
+
+Example usage in your code:
+```
+from perceptual_similarity import PerceptualLoss
+
+print(PerceptualLoss().forward(image1, image2))
+```
+
 ## (0) Dependencies/Setup
 
 ### Installation
