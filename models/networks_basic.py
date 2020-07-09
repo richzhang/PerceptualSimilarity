@@ -17,11 +17,11 @@ import models as util
 def spatial_average(in_tens, keepdim=True):
     return in_tens.mean([2,3],keepdim=keepdim)
 
-def upsample(in_tens, out_H=64): # assumes scale factor is same for H and W
-    in_H = in_tens.shape[2]
-    scale_factor = 1.*out_H/in_H
+def upsample(in_tens, out_HW=(64,64)): # assumes scale factor is same for H and W
+    in_H, in_W = in_tens.shape[2], in_tens.shape[3]
+    scale_factor_H, scale_factor_W = 1.*out_HW[0]/in_H, 1.*out_HW[1]/in_W
 
-    return nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=False)(in_tens)
+    return nn.Upsample(scale_factor=(scale_factor_H, scale_factor_W), mode='bilinear', align_corners=False)(in_tens)
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
@@ -73,12 +73,12 @@ class PNetLin(nn.Module):
 
         if(self.lpips):
             if(self.spatial):
-                res = [upsample(self.lins[kk].model(diffs[kk]), out_H=in0.shape[2]) for kk in range(self.L)]
+                res = [upsample(self.lins[kk].model(diffs[kk]), out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
                 res = [spatial_average(self.lins[kk].model(diffs[kk]), keepdim=True) for kk in range(self.L)]
         else:
             if(self.spatial):
-                res = [upsample(diffs[kk].sum(dim=1,keepdim=True), out_H=in0.shape[2]) for kk in range(self.L)]
+                res = [upsample(diffs[kk].sum(dim=1,keepdim=True), out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
                 res = [spatial_average(diffs[kk].sum(dim=1,keepdim=True), keepdim=True) for kk in range(self.L)]
 

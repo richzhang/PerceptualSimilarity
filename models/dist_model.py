@@ -40,9 +40,6 @@ class DistModel(BaseModel):
             use_gpu - bool - whether or not to use a GPU
             printNet - bool - whether or not to print network architecture out
             spatial - bool - whether to output an array containing varying distances across spatial dimensions
-            spatial_shape - if given, output spatial shape. if None then spatial shape is determined automatically via spatial_factor (see below).
-            spatial_factor - if given, specifies upsampling factor relative to the largest spatial extent of a convolutional layer. if None then resized to size of input images.
-            spatial_order - spline order of filter for upsampling in spatial mode, by default 1 (bilinear).
             is_train - bool - [True] for training mode
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
