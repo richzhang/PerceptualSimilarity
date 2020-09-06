@@ -73,7 +73,7 @@ class LPIPS(nn.Module):
 
                 if(verbose):
                     print('Loading model from: %s'%model_path)
-                self.load_state_dict(torch.load(model_path, map_location='cpu'), strict=False)
+                self.load_state_dict(torch.load(model_path, map_location='cpu'), strict=False)          
 
         if(eval_mode):
             self.eval()

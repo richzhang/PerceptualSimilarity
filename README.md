@@ -2,12 +2,25 @@
 ## Perceptual Similarity Metric and Dataset [[Project Page]](http://richzhang.github.io/PerceptualSimilarity/)
 
 **The Unreasonable Effectiveness of Deep Features as a Perceptual Metric**  
-[Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/).
-<br>In [CVPR](https://arxiv.org/abs/1801.03924), 2018.  
+[Richard Zhang](https://richzhang.github.io/), [Phillip Isola](http://web.mit.edu/phillipi/), [Alexei A. Efros](http://www.eecs.berkeley.edu/~efros/), [Eli Shechtman](https://research.adobe.com/person/eli-shechtman/), [Oliver Wang](http://www.oliverwang.info/). In [CVPR](https://arxiv.org/abs/1801.03924), 2018.
 
 <img src='https://richzhang.github.io/PerceptualSimilarity/index_files/fig1_v2.jpg' width=1200>
 
-This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)**. It can also be used as a "perceptual loss". This uses PyTorch; a Tensorflow alternative is [here](https://github.com/alexlee-gk/lpips-tensorflow).
+### Quick start
+
+Run `pip install lpips`
+
+```python
+import lpips
+loss_fn_alex = lpips.LPIPS(net='alex') # best forward scores
+loss_fn_vgg = lpips.LPIPS(net='vgg') # closer to "traditional" perceptual loss, when used for optimization
+
+d = loss_fn_alex(img0, img1) # lpips score; imgs are Nx3xHxW
+  # IMPORTANT: normalized to [-1, +1]
+```
+
+More thorough information about variants is below. This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)**. It can also be used as a "perceptual loss". This uses PyTorch; a Tensorflow alternative is [here](https://github.com/alexlee-gk/lpips-tensorflow).
+
 
 **Table of Contents**<br>
 1. [Learned Perceptual Image Patch Similarity (LPIPS) metric](#1-learned-perceptual-image-patch-similarity-lpips-metric)<br>
@@ -45,9 +58,9 @@ Evaluate the distance between image patches. **Higher means further/more differe
 Example scripts to take the distance between 2 specific images, all corresponding pairs of images in 2 directories, or all pairs of images within a directory:
 
 ```
-python compute_dists.py -p0 imgs/ex_ref.png -p1 imgs/ex_p0.png --use_gpu
-python compute_dists_dirs.py -d0 imgs/ex_dir0 -d1 imgs/ex_dir1 -o imgs/example_dists.txt --use_gpu
-python compute_dists_pair.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt --use_gpu
+python lpips_2imgs.py -p0 imgs/ex_ref.png -p1 imgs/ex_p0.png --use_gpu
+python lpips_2dirs.py -d0 imgs/ex_dir0 -d1 imgs/ex_dir1 -o imgs/example_dists.txt --use_gpu
+python lpips_1dir_allpairs.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt --use_gpu
 ```
 
 #### (A.II) Python code
@@ -55,9 +68,9 @@ python compute_dists_pair.py -d imgs/ex_dir_pair -o imgs/example_dists_pair.txt 
 File [test_network.py](test_network.py) shows example usage. This snippet is all you really need.
 
 ```python
-import models
-model = models.PerceptualLoss(model='net-lin', net='alex', use_gpu=use_gpu, gpu_ids=[0])
-d = model.forward(im0,im1)
+import lpips
+loss_fn = lpips.LPIPS(net='alex')
+d = loss_fn.forward(im0,im1)
 ```
 
 Variables ```im0, im1``` is a PyTorch Tensor/Variable with shape ```Nx3xHxW``` (```N``` patches of size ```HxW```, RGB images scaled in `[-1,+1]`). This returns `d`, a length `N` Tensor/Variable.
@@ -65,12 +78,12 @@ Variables ```im0, im1``` is a PyTorch Tensor/Variable with shape ```Nx3xHxW``` (
 Run `python test_network.py` to take the distance between example reference image [`ex_ref.png`](imgs/ex_ref.png) to distorted images [`ex_p0.png`](./imgs/ex_p0.png) and [`ex_p1.png`](imgs/ex_p1.png). Before running it - which do you think *should* be closer?
 
 **Some Options** By default in `model.initialize`:
-- `net='alex'`: Network `alex` is fastest, performs the best, and is the default. You can instead use `squeeze` or `vgg`.
-- `model='net-lin'`: This adds a linear calibration on top of intermediate features in the net. Set this to `model=net` to equally weight all the features.
+- By default, `net='alex'`. Network `alex` is fastest, performs the best (as a forward metric), and is the default. For backpropping, `net='vgg'` loss is closer to the traditional "perceptual loss".
+- By default, `lpips=True`. This adds a linear calibration on top of intermediate features in the net. Set this to `lpips=False` to equally weight all the features.
 
 ### (B) Backpropping through the metric
 
-File [`perceptual_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python perceptual_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights.
+File [`lpips_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python lpips_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights.
 
 ### (C) About the metric
 
@@ -101,8 +114,8 @@ Script `test_dataset_model.py` evaluates a perceptual model on a subset of the d
     
 **Perceptual similarity model flags**
 - `--model`: perceptual similarity model to use
-    - `net-lin` for our LPIPS learned similarity model (linear network on top of internal activations of pretrained network)
-    - `net` for a classification network (uncalibrated with all layers averaged)
+    - `lpips` for our LPIPS learned similarity model (linear network on top of internal activations of pretrained network)
+    - `baseline` for a classification network (uncalibrated with all layers averaged)
     - `l2` for Euclidean distance
     - `ssim` for Structured Similarity Image Metric
 - `--net`: [`squeeze`,`alex`,`vgg`] for the `net-lin` and `net` models; ignored for `l2` and `ssim` models
@@ -112,7 +125,7 @@ Script `test_dataset_model.py` evaluates a perceptual model on a subset of the d
 - `--batch_size`: evaluation batch size (will default to 1)
 - `--use_gpu`: turn on this flag for GPU usage
 
-An example usage is as follows: `python ./test_dataset_model.py --dataset_mode 2afc --datasets val/traditional val/cnn --model net-lin --net alex --use_gpu --batch_size 50`. This would evaluate our model on the "traditional" and "cnn" validation datasets.
+An example usage is as follows: `python ./test_dataset_model.py --dataset_mode 2afc --datasets val/traditional val/cnn --model lpips --net alex --use_gpu --batch_size 50`. This would evaluate our model on the "traditional" and "cnn" validation datasets.
 
 ### (C) About the dataset
 
