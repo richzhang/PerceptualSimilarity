@@ -43,9 +43,9 @@ for dataset in opt.datasets:
 
 	# evaluate model on data
 	if(opt.dataset_mode=='2afc'):
-		(score, results_verbose) = dm.score_2afc_dataset(data_loader, trainer.forward, name=dataset)
+		(score, results_verbose) = lpips.score_2afc_dataset(data_loader, trainer.forward, name=dataset)
 	elif(opt.dataset_mode=='jnd'):
-		(score, results_verbose) = dm.score_jnd_dataset(data_loader, trainer.forward, name=dataset)
+		(score, results_verbose) = lpips.score_jnd_dataset(data_loader, trainer.forward, name=dataset)
 
 	# print results
 	print('  Dataset [%s]: %.2f'%(dataset,100.*score))
