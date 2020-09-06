@@ -5,10 +5,10 @@ import os
 def CreateDataset(dataroots,dataset_mode='2afc',load_size=64,):
     dataset = None
     if dataset_mode=='2afc': # human judgements
-        from dataset.twoafc_dataset import TwoAFCDataset
+        from data.dataset.twoafc_dataset import TwoAFCDataset
         dataset = TwoAFCDataset()
     elif dataset_mode=='jnd': # human judgements
-        from dataset.jnd_dataset import JNDDataset
+        from data.dataset.jnd_dataset import JNDDataset
         dataset = JNDDataset()
     else:
         raise ValueError("Dataset Mode [%s] not recognized."%self.dataset_mode)
