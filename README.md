@@ -8,15 +8,17 @@
 
 ### Quick start
 
-Run `pip install lpips`
+Run `pip install lpips`. The following Python code uses show an example use case.
 
 ```python
 import lpips
 loss_fn_alex = lpips.LPIPS(net='alex') # best forward scores
 loss_fn_vgg = lpips.LPIPS(net='vgg') # closer to "traditional" perceptual loss, when used for optimization
 
-d = loss_fn_alex(img0, img1) # lpips score; imgs are Nx3xHxW
-  # IMPORTANT: normalized to [-1, +1]
+import torch
+img0 = torch.zeros(1,3,64,64) # image should be RGB, IMPORTANT: normalized to [-1,1]
+img1 = torch.zeros(1,3,64,64)
+d = loss_fn_alex(img0, img1)
 ```
 
 More thorough information about variants is below. This repository contains our **perceptual metric (LPIPS)** and **dataset (BAPPS)**. It can also be used as a "perceptual loss". This uses PyTorch; a Tensorflow alternative is [here](https://github.com/alexlee-gk/lpips-tensorflow).
