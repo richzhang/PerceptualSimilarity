@@ -1,30 +1,30 @@
 
-from __future__ import absolute_import
-
-import sys
-import scipy
-import scipy.misc
 import numpy as np
 import torch
 from torch.autograd import Variable
+import matplotlib.pyplot as plt
+import argparse
 import lpips
 
-from IPython import embed
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('--ref_path', type=str, default='./imgs/ex_ref.png')
+parser.add_argument('--pred_path', type=str, default='./imgs/ex_p1.png')
+parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use GPU')
 
-use_gpu = False
-
-ref_path  = './imgs/ex_ref.png'
-pred_path = './imgs/ex_p1.png'
-
-ref = lpips.im2tensor(lpips.load_image(ref_path))
-pred = Variable(lpips.im2tensor(lpips.load_image(pred_path)), requires_grad=True)
+opt = parser.parse_args()
 
 loss_fn = lpips.LPIPS(net='vgg')
-if(use_gpu):
+if(opt.use_gpu):
     loss_fn.cuda()
+
+ref = lpips.im2tensor(lpips.load_image(opt.ref_path))
+pred = Variable(lpips.im2tensor(lpips.load_image(opt.pred_path)), requires_grad=True)
+if(opt.use_gpu):
+    ref = ref.cuda()
+    pred = pred.cuda()
+
 optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
 
-import matplotlib.pyplot as plt
 plt.ion()
 fig = plt.figure(1)
 ax = fig.add_subplot(131)
@@ -35,7 +35,7 @@ ax.imshow(lpips.tensor2im(pred.data))
 ax.set_title('initialization')
 
 for i in range(1000):
-    dist = loss_fn.forward(pred, ref, normalize=False)
+    dist = loss_fn.forward(pred, ref)
     optimizer.zero_grad()
     dist.backward()
     optimizer.step()
@@ -45,7 +45,7 @@ for i in range(1000):
         print('iter %d, dist %.3g' % (i, dist.view(-1).data.cpu().numpy()[0]))
         pred.data = torch.clamp(pred.data, -1, 1)
         pred_img = lpips.tensor2im(pred.data)
-        # embed()
+
         ax = fig.add_subplot(132)            
         ax.imshow(pred_img)
         ax.set_title('iter %d, dist %.3f' % (i, dist.view(-1).data.cpu().numpy()[0]))

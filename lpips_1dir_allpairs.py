@@ -2,7 +2,6 @@ import argparse
 import os
 import lpips
 import numpy as np
-from IPython import embed
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-d','--dir', type=str, default='./imgs/ex_dir_pair')

@@ -1,6 +1,5 @@
 import argparse
 import lpips
-from IPython import embed
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-p0','--path0', type=str, default='./imgs/ex_ref.png')
