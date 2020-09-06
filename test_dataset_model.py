@@ -1,5 +1,5 @@
 import numpy as np
-from models import dist_model as dm
+import lpips
 from data import data_loader as dl
 import argparse
 from IPython import embed
@@ -26,9 +26,9 @@ if(opt.model in ['l2','ssim']):
 	opt.batch_size = 1
 
 # initialize model
-model = dm.DistModel()
-# model.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
-model.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace, 
+trainer = lpips.Trainer()
+# trainer.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
+trainer.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace, 
 	model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk,
 	version=opt.version, gpu_ids=opt.gpu_ids)
 
@@ -43,9 +43,9 @@ for dataset in opt.datasets:
 
 	# evaluate model on data
 	if(opt.dataset_mode=='2afc'):
-		(score, results_verbose) = dm.score_2afc_dataset(data_loader, model.forward, name=dataset)
+		(score, results_verbose) = dm.score_2afc_dataset(data_loader, trainer.forward, name=dataset)
 	elif(opt.dataset_mode=='jnd'):
-		(score, results_verbose) = dm.score_jnd_dataset(data_loader, model.forward, name=dataset)
+		(score, results_verbose) = dm.score_jnd_dataset(data_loader, trainer.forward, name=dataset)
 
 	# print results
 	print('  Dataset [%s]: %.2f'%(dataset,100.*score))

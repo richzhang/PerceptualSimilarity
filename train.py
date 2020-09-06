@@ -4,7 +4,7 @@ cudnn.benchmark=False
 import numpy as np
 import time
 import os
-from models import dist_model as dm
+import lpips
 from data import data_loader as dl
 import argparse
 from util.visualizer import Visualizer
@@ -42,8 +42,8 @@ if(not os.path.exists(opt.save_dir)):
     os.mkdir(opt.save_dir)
 
 # initialize model
-model = dm.DistModel()
-model.initialize(model=opt.model, net=opt.net, use_gpu=opt.use_gpu, is_train=True, 
+trainer = lpips.Trainer()
+trainer.initialize(model=opt.model, net=opt.net, use_gpu=opt.use_gpu, is_train=True, 
     pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk, gpu_ids=opt.gpu_ids)
 
 # load data from all training sets
@@ -63,14 +63,14 @@ for epoch in range(1, opt.nepoch + opt.nepoch_decay + 1):
         total_steps += opt.batch_size
         epoch_iter = total_steps - dataset_size * (epoch - 1)
 
-        model.set_input(data)
-        model.optimize_parameters()
+        trainer.set_input(data)
+        trainer.optimize_parameters()
 
         if total_steps % opt.display_freq == 0:
-            visualizer.display_current_results(model.get_current_visuals(), epoch)
+            visualizer.display_current_results(trainer.get_current_visuals(), epoch)
 
         if total_steps % opt.print_freq == 0:
-            errors = model.get_current_errors()
+            errors = trainer.get_current_errors()
             t = (time.time()-iter_start_time)/opt.batch_size
             t2o = (time.time()-epoch_start_time)/3600.
             t2 = t2o*D/(i+.0001)
@@ -85,19 +85,19 @@ for epoch in range(1, opt.nepoch + opt.nepoch_decay + 1):
         if total_steps % opt.save_latest_freq == 0:
             print('saving the latest model (epoch %d, total_steps %d)' %
                   (epoch, total_steps))
-            model.save(opt.save_dir, 'latest')
+            trainer.save(opt.save_dir, 'latest')
 
     if epoch % opt.save_epoch_freq == 0:
         print('saving the model at the end of epoch %d, iters %d' %
               (epoch, total_steps))
-        model.save(opt.save_dir, 'latest')
-        model.save(opt.save_dir, epoch)
+        trainer.save(opt.save_dir, 'latest')
+        trainer.save(opt.save_dir, epoch)
 
     print('End of epoch %d / %d \t Time Taken: %d sec' %
           (epoch, opt.nepoch + opt.nepoch_decay, time.time() - epoch_start_time))
 
     if epoch > opt.nepoch:
-        model.update_learning_rate(opt.nepoch_decay)
+        trainer.update_learning_rate(opt.nepoch_decay)
 
-# model.save_done(True)
+# trainer.save_done(True)
 fid.close()

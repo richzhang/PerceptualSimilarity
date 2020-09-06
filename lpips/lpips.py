@@ -11,8 +11,7 @@ from pdb import set_trace as st
 from skimage import color
 from IPython import embed
 from . import pretrained_networks as pn
-
-import models as util
+import lpips
 
 def spatial_average(in_tens, keepdim=True):
     return in_tens.mean([2,3],keepdim=keepdim)
@@ -24,15 +23,22 @@ def upsample(in_tens, out_HW=(64,64)): # assumes scale factor is same for H and 
     return nn.Upsample(scale_factor=(scale_factor_H, scale_factor_W), mode='bilinear', align_corners=False)(in_tens)
 
 # Learned perceptual metric
-class PNetLin(nn.Module):
-    def __init__(self, pnet_type='vgg', pnet_rand=False, pnet_tune=False, use_dropout=True, spatial=False, version='0.1', lpips=True):
-        super(PNetLin, self).__init__()
+class LPIPS(nn.Module):
+    def __init__(self, pretrained=True, net='alex', version='0.1', lpips=True, spatial=False, 
+        pnet_rand=False, pnet_tune=False, use_dropout=True, model_path=None, eval_mode=True, verbose=True):
+        # lpips - [True] means with linear calibration on top of base network
+        # pretrained - [True] means load linear weights
 
-        self.pnet_type = pnet_type
+        super(LPIPS, self).__init__()
+        if(verbose):
+            print('Setting up [%s] perceptual loss: trunk [%s], v[%s], spatial [%s]'%
+                ('LPIPS' if lpips else 'baseline', net, version, 'on' if spatial else 'off'))
+
+        self.pnet_type = net
         self.pnet_tune = pnet_tune
         self.pnet_rand = pnet_rand
         self.spatial = spatial
-        self.lpips = lpips
+        self.lpips = lpips # false means baseline of just averaging all layers
         self.version = version
         self.scaling_layer = ScalingLayer()
 
@@ -61,14 +67,31 @@ class PNetLin(nn.Module):
                 self.lin6 = NetLinLayer(self.chns[6], use_dropout=use_dropout)
                 self.lins+=[self.lin5,self.lin6]
 
-    def forward(self, in0, in1, retPerLayer=False):
+            if(pretrained):
+                if(model_path is None):
+                    import inspect
+                    import os
+                    model_path = os.path.abspath(os.path.join(inspect.getfile(self.__init__), '..', 'weights/v%s/%s.pth'%(version,net)))
+
+                if(verbose):
+                    print('Loading model from: %s'%model_path)
+                self.load_state_dict(torch.load(model_path, map_location='cpu'), strict=False)
+
+        if(eval_mode):
+            self.eval()
+
+    def forward(self, in0, in1, retPerLayer=False, normalize=False):
+        if normalize: # turn on this flag if input is [0,1] so it can be adjusted to [-1, +1]
+            target = 2 * target  - 1
+            pred = 2 * pred  - 1
+
         # v0.0 - original release had a bug, where input was not scaled
         in0_input, in1_input = (self.scaling_layer(in0), self.scaling_layer(in1)) if self.version=='0.1' else (in0, in1)
         outs0, outs1 = self.net.forward(in0_input), self.net.forward(in1_input)
         feats0, feats1, diffs = {}, {}, {}
 
         for kk in range(self.L):
-            feats0[kk], feats1[kk] = util.normalize_tensor(outs0[kk]), util.normalize_tensor(outs1[kk])
+            feats0[kk], feats1[kk] = lpips.normalize_tensor(outs0[kk]), lpips.normalize_tensor(outs1[kk])
             diffs[kk] = (feats0[kk]-feats1[kk])**2
 
         if(self.lpips):
@@ -145,10 +168,9 @@ class FakeNet(nn.Module):
     def __init__(self, use_gpu=True, colorspace='Lab'):
         super(FakeNet, self).__init__()
         self.use_gpu = use_gpu
-        self.colorspace=colorspace
+        self.colorspace = colorspace
 
 class L2(FakeNet):
-
     def forward(self, in0, in1, retPerLayer=None):
         assert(in0.size()[0]==1) # currently only supports batchSize 1
 
@@ -157,8 +179,8 @@ class L2(FakeNet):
             value = torch.mean(torch.mean(torch.mean((in0-in1)**2,dim=1).view(N,1,X,Y),dim=2).view(N,1,1,Y),dim=3).view(N)
             return value
         elif(self.colorspace=='Lab'):
-            value = util.l2(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
-                util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
+            value = lpips.l2(lpips.tensor2np(lpips.tensor2tensorlab(in0.data,to_norm=False)), 
+                lpips.tensor2np(lpips.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
             ret_var = Variable( torch.Tensor((value,) ) )
             if(self.use_gpu):
                 ret_var = ret_var.cuda()
@@ -170,10 +192,10 @@ class DSSIM(FakeNet):
         assert(in0.size()[0]==1) # currently only supports batchSize 1
 
         if(self.colorspace=='RGB'):
-            value = util.dssim(1.*util.tensor2im(in0.data), 1.*util.tensor2im(in1.data), range=255.).astype('float')
+            value = lpips.dssim(1.*lpips.tensor2im(in0.data), 1.*lpips.tensor2im(in1.data), range=255.).astype('float')
         elif(self.colorspace=='Lab'):
-            value = util.dssim(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
-                util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
+            value = lpips.dssim(lpips.tensor2np(lpips.tensor2tensorlab(in0.data,to_norm=False)), 
+                lpips.tensor2np(lpips.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
         ret_var = Variable( torch.Tensor((value,) ) )
         if(self.use_gpu):
             ret_var = ret_var.cuda()

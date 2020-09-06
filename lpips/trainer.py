@@ -1,37 +1,27 @@
 
 from __future__ import absolute_import
 
-import sys
 import numpy as np
 import torch
 from torch import nn
-import os
 from collections import OrderedDict
 from torch.autograd import Variable
-import itertools
-from .base_model import BaseModel
 from scipy.ndimage import zoom
-import fractions
-import functools
-import skimage.transform
 from tqdm import tqdm
-
 from IPython import embed
+import lpips
 
-from . import networks_basic as networks
-import models as util
-
-class DistModel(BaseModel):
+class Trainer():
     def name(self):
         return self.model_name
 
-    def initialize(self, model='net-lin', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
+    def initialize(self, model='lpips', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
             use_gpu=True, printNet=False, spatial=False, 
             is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0]):
         '''
         INPUTS
-            model - ['net-lin'] for linearly calibrated network
-                    ['net'] for off-the-shelf network
+            model - ['lpips'] for linearly calibrated network
+                    ['baseline'] for off-the-shelf network
                     ['L2'] for L2 distance in Lab colorspace
                     ['SSIM'] for ssim in RGB colorspace
             net - ['squeeze','alex','vgg']
@@ -46,36 +36,25 @@ class DistModel(BaseModel):
             version - 0.1 for latest, 0.0 was original (with a bug)
             gpu_ids - int array - [0] by default, gpus to use
         '''
-        BaseModel.initialize(self, use_gpu=use_gpu, gpu_ids=gpu_ids)
-
+        self.use_gpu = use_gpu
+        self.gpu_ids = gpu_ids
         self.model = model
         self.net = net
         self.is_train = is_train
         self.spatial = spatial
-        self.gpu_ids = gpu_ids
         self.model_name = '%s [%s]'%(model,net)
 
-        if(self.model == 'net-lin'): # pretrained net + linear layer
-            self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,
-                use_dropout=True, spatial=spatial, version=version, lpips=True)
-            kw = {}
-            if not use_gpu:
-                kw['map_location'] = 'cpu'
-            if(model_path is None):
-                import inspect
-                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', 'weights/v%s/%s.pth'%(version,net)))
-
-            if(not is_train):
-                print('Loading model from: %s'%model_path)
-                self.net.load_state_dict(torch.load(model_path, **kw), strict=False)
-
-        elif(self.model=='net'): # pretrained network
-            self.net = networks.PNetLin(pnet_rand=pnet_rand, pnet_type=net, lpips=False)
+        if(self.model == 'lpips'): # pretrained net + linear layer
+            self.net = lpips.LPIPS(pretrained=not is_train, net=net, version=version, lpips=True, spatial=spatial, 
+                pnet_rand=pnet_rand, pnet_tune=pnet_tune, 
+                use_dropout=True, model_path=model_path, eval_mode=False)
+        elif(self.model=='baseline'): # pretrained network
+            self.net = lpips.LPIPS(pnet_rand=pnet_rand, net=net, lpips=False)
         elif(self.model in ['L2','l2']):
-            self.net = networks.L2(use_gpu=use_gpu,colorspace=colorspace) # not really a network, only for testing
+            self.net = lpips.L2(use_gpu=use_gpu,colorspace=colorspace) # not really a network, only for testing
             self.model_name = 'L2'
         elif(self.model in ['DSSIM','dssim','SSIM','ssim']):
-            self.net = networks.DSSIM(use_gpu=use_gpu,colorspace=colorspace)
+            self.net = lpips.DSSIM(use_gpu=use_gpu,colorspace=colorspace)
             self.model_name = 'SSIM'
         else:
             raise ValueError("Model [%s] not recognized." % self.model)
@@ -143,9 +122,6 @@ class DistModel(BaseModel):
         self.var_p1 = Variable(self.input_p1,requires_grad=True)
 
     def forward_train(self): # run forward pass
-        # print(self.net.module.scaling_layer.shift)
-        # print(torch.norm(self.net.module.net.slice1[0].weight).item(), torch.norm(self.net.module.lin0.model[1].weight).item())
-
         self.d0 = self.forward(self.var_ref, self.var_p0)
         self.d1 = self.forward(self.var_ref, self.var_p1)
         self.acc_r = self.compute_accuracy(self.d0,self.d1,self.input_judge)
@@ -177,9 +153,9 @@ class DistModel(BaseModel):
     def get_current_visuals(self):
         zoom_factor = 256/self.var_ref.data.size()[2]
 
-        ref_img = util.tensor2im(self.var_ref.data)
-        p0_img = util.tensor2im(self.var_p0.data)
-        p1_img = util.tensor2im(self.var_p1.data)
+        ref_img = lpips.tensor2im(self.var_ref.data)
+        p0_img = lpips.tensor2im(self.var_p0.data)
+        p1_img = lpips.tensor2im(self.var_p1.data)
 
         ref_img_vis = zoom(ref_img,[zoom_factor, zoom_factor, 1],order=0)
         p0_img_vis = zoom(p0_img,[zoom_factor, zoom_factor, 1],order=0)
@@ -196,6 +172,19 @@ class DistModel(BaseModel):
             self.save_network(self.net, path, '', label)
         self.save_network(self.rankLoss.net, path, 'rank', label)
 
+    # helper saving function that can be used by subclasses
+    def save_network(self, network, path, network_label, epoch_label):
+        save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
+        save_path = os.path.join(path, save_filename)
+        torch.save(network.state_dict(), save_path)
+
+    # helper loading function that can be used by subclasses
+    def load_network(self, network, network_label, epoch_label):
+        save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
+        save_path = os.path.join(self.save_dir, save_filename)
+        print('Loading network from %s'%save_path)
+        network.load_state_dict(torch.load(save_path))
+
     def update_learning_rate(self,nepoch_decay):
         lrd = self.lr / nepoch_decay
         lr = self.old_lr - lrd
@@ -205,6 +194,15 @@ class DistModel(BaseModel):
 
         print('update lr [%s] decay: %f -> %f' % (type,self.old_lr, lr))
         self.old_lr = lr
+
+
+    def get_image_paths(self):
+        return self.image_paths
+
+    def save_done(self, flag=False):
+        np.save(os.path.join(self.save_dir, 'done_flag'),flag)
+        np.savetxt(os.path.join(self.save_dir, 'done_flag'),[flag,],fmt='%i')
+
 
 def score_2afc_dataset(data_loader, func, name=''):
     ''' Function computes Two Alternative Forced Choice (2AFC) score using
@@ -276,6 +274,6 @@ def score_jnd_dataset(data_loader, func, name=''):
 
     precs = TPs/(TPs+FPs)
     recs = TPs/(TPs+FNs)
-    score = util.voc_ap(recs,precs)
+    score = lpips.voc_ap(recs,precs)
 
     return(score, dict(ds=ds,sames=sames))

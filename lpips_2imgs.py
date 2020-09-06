@@ -1,6 +1,6 @@
 import argparse
-import models
-from util import util
+import lpips
+from IPython import embed
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-p0','--path0', type=str, default='./imgs/ex_ref.png')
@@ -11,17 +11,19 @@ parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use 
 opt = parser.parse_args()
 
 ## Initializing the model
-model = models.PerceptualLoss(model='net-lin',net='alex',use_gpu=opt.use_gpu,version=opt.version)
+loss_fn = lpips.LPIPS(net='alex',version=opt.version)
+
+if(opt.use_gpu):
+	loss_fn.cuda()
 
 # Load images
-img0 = util.im2tensor(util.load_image(opt.path0)) # RGB image from [-1,1]
-img1 = util.im2tensor(util.load_image(opt.path1))
+img0 = lpips.im2tensor(lpips.load_image(opt.path0)) # RGB image from [-1,1]
+img1 = lpips.im2tensor(lpips.load_image(opt.path1))
 
 if(opt.use_gpu):
 	img0 = img0.cuda()
 	img1 = img1.cuda()
 
-
 # Compute distance
-dist01 = model.forward(img0,img1)
+dist01 = loss_fn.forward(img0,img1)
 print('Distance: %.3f'%dist01)
