@@ -80,8 +80,8 @@ class LPIPS(nn.Module):
 
     def forward(self, in0, in1, retPerLayer=False, normalize=False):
         if normalize: # turn on this flag if input is [0,1] so it can be adjusted to [-1, +1]
-            target = 2 * target  - 1
-            pred = 2 * pred  - 1
+            in0 = 2 * in0  - 1
+            in1 = 2 * in1  - 1
 
         # v0.0 - original release had a bug, where input was not scaled
         in0_input, in1_input = (self.scaling_layer(in0), self.scaling_layer(in1)) if self.version=='0.1' else (in0, in1)
