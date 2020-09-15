@@ -8,6 +8,7 @@ from torch.autograd import Variable
 import numpy as np
 from IPython import embed
 from . import pretrained_networks as pn
+import torch.nn
 
 import lpips
 
@@ -64,6 +65,7 @@ class LPIPS(nn.Module):
                 self.lin5 = NetLinLayer(self.chns[5], use_dropout=use_dropout)
                 self.lin6 = NetLinLayer(self.chns[6], use_dropout=use_dropout)
                 self.lins+=[self.lin5,self.lin6]
+            self.lins = nn.ModuleList(self.lins)
 
             if(pretrained):
                 if(model_path is None):
@@ -111,6 +113,7 @@ class LPIPS(nn.Module):
             return (val, res)
         else:
             return val
+
 
 class ScalingLayer(nn.Module):
     def __init__(self):
