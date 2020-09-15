@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
      name='lpips',  
-     version='0.1',
+     version='0.1.1',
      author="Richard Zhang",
      author_email="rizhang@adobe.com",
      description="LPIPS Similarity metric",
