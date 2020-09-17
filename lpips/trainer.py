@@ -10,6 +10,8 @@ from scipy.ndimage import zoom
 from tqdm import tqdm
 from IPython import embed
 import lpips
+import os
+
 
 class Trainer():
     def name(self):
@@ -63,7 +65,7 @@ class Trainer():
 
         if self.is_train: # training mode
             # extra network on top to go from distances (d0,d1) => predicted human judgment (h*)
-            self.rankLoss = networks.BCERankingLoss()
+            self.rankLoss = lpips.BCERankingLoss()
             self.parameters += list(self.rankLoss.net.parameters())
             self.lr = lr
             self.old_lr = lr
