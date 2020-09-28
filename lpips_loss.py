@@ -19,8 +19,9 @@ if(opt.use_gpu):
 ref = lpips.im2tensor(lpips.load_image(opt.ref_path))
 pred = Variable(lpips.im2tensor(lpips.load_image(opt.pred_path)), requires_grad=True)
 if(opt.use_gpu):
-    ref = ref.cuda()
-    pred = pred.cuda()
+    with torch.no_grad():
+        ref = ref.cuda()
+        pred = pred.cuda()
 
 optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
 

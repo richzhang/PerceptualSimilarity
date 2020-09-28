@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.nn.init as init
 from torch.autograd import Variable
 import numpy as np
-from IPython import embed
 from . import pretrained_networks as pn
 import torch.nn
 
