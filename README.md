@@ -85,7 +85,7 @@ Run `python test_network.py` to take the distance between example reference imag
 
 ### (B) Backpropping through the metric
 
-File [`lpips_loss.py`](perceptual_loss.py) shows how to iteratively optimize using the metric. Run `python lpips_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights.
+File [`lpips_loss.py`](lpips_loss.py) shows how to iteratively optimize using the metric. Run `python lpips_loss.py` for a demo. The code can also be used to implement vanilla VGG loss, without our learned weights.
 
 ### (C) About the metric
 
