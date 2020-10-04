@@ -16,9 +16,7 @@ def spatial_average(in_tens, keepdim=True):
 
 def upsample(in_tens, out_HW=(64,64)): # assumes scale factor is same for H and W
     in_H, in_W = in_tens.shape[2], in_tens.shape[3]
-    scale_factor_H, scale_factor_W = 1.*out_HW[0]/in_H, 1.*out_HW[1]/in_W
-
-    return nn.Upsample(scale_factor=(scale_factor_H, scale_factor_W), mode='bilinear', align_corners=False)(in_tens)
+    return nn.Upsample(size=out_HW, mode='bilinear', align_corners=False)(in_tens)
 
 # Learned perceptual metric
 class LPIPS(nn.Module):
@@ -95,9 +93,9 @@ class LPIPS(nn.Module):
 
         if(self.lpips):
             if(self.spatial):
-                res = [upsample(self.lins[kk].model(diffs[kk]), out_HW=in0.shape[2:]) for kk in range(self.L)]
+                res = [upsample(self.lins[kk](diffs[kk]), out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
-                res = [spatial_average(self.lins[kk].model(diffs[kk]), keepdim=True) for kk in range(self.L)]
+                res = [spatial_average(self.lins[kk](diffs[kk]), keepdim=True) for kk in range(self.L)]
         else:
             if(self.spatial):
                 res = [upsample(diffs[kk].sum(dim=1,keepdim=True), out_HW=in0.shape[2:]) for kk in range(self.L)]
@@ -107,6 +105,16 @@ class LPIPS(nn.Module):
         val = res[0]
         for l in range(1,self.L):
             val += res[l]
+
+        # a = spatial_average(self.lins[kk](diffs[kk]), keepdim=True)
+        # b = torch.max(self.lins[kk](feats0[kk]**2))
+        # for kk in range(self.L):
+        #     a += spatial_average(self.lins[kk](diffs[kk]), keepdim=True)
+        #     b = torch.max(b,torch.max(self.lins[kk](feats0[kk]**2)))
+        # a = a/self.L
+        # from IPython import embed
+        # embed()
+        # return 10*torch.log10(b/a)
         
         if(retPerLayer):
             return (val, res)
@@ -133,6 +141,8 @@ class NetLinLayer(nn.Module):
         layers += [nn.Conv2d(chn_in, chn_out, 1, stride=1, padding=0, bias=False),]
         self.model = nn.Sequential(*layers)
 
+    def forward(self, x):
+        return self.model(x)
 
 class Dist2LogitLayer(nn.Module):
     ''' takes 2 distances, puts through fc layers, spits out value between [0,1] (if use_sigmoid is True) '''
