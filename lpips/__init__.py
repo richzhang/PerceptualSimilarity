@@ -105,7 +105,7 @@ def load_image(path):
         import rawpy
         with rawpy.imread(path) as raw:
             img = raw.postprocess()
-    elif(path[-3:]=='bmp' or path[-3:]=='jpg' or path[-3:]=='png'):
+    elif(path[-3:]=='bmp' or path[-3:]=='jpg' or path[-3:]=='png' or path[-4:]=='jpeg'):
         import cv2
         return cv2.imread(path)[:,:,::-1]
     else:
