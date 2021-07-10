@@ -89,18 +89,18 @@ class LPIPS(nn.Module):
 
         for kk in range(self.L):
             feats0[kk], feats1[kk] = lpips.normalize_tensor(outs0[kk]), lpips.normalize_tensor(outs1[kk])
-            diffs[kk] = (feats0[kk]-feats1[kk])**2
+            diffs[kk] = feats0[kk]-feats1[kk]
 
         if(self.lpips):
             if(self.spatial):
-                res = [upsample(self.lins[kk](diffs[kk]), out_HW=in0.shape[2:]) for kk in range(self.L)]
+                res = [upsample(self.lins[kk](diffs[kk]).square(), out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
-                res = [spatial_average(self.lins[kk](diffs[kk]), keepdim=True) for kk in range(self.L)]
+                res = [spatial_average(self.lins[kk](diffs[kk]).square(), keepdim=True) for kk in range(self.L)]
         else:
             if(self.spatial):
-                res = [upsample(diffs[kk].sum(dim=1,keepdim=True), out_HW=in0.shape[2:]) for kk in range(self.L)]
+                res = [upsample(diffs[kk].square().sum(dim=1,keepdim=True), out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
-                res = [spatial_average(diffs[kk].sum(dim=1,keepdim=True), keepdim=True) for kk in range(self.L)]
+                res = [spatial_average(diffs[kk].square().sum(dim=1,keepdim=True), keepdim=True) for kk in range(self.L)]
 
         val = res[0]
         for l in range(1,self.L):
