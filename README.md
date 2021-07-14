@@ -99,7 +99,7 @@ If you use LPIPS in your publication, please specify which version you are using
 
 ### (A) Downloading the dataset
 
-Run `bash ./scripts/download_dataset.sh` to download and unzip the dataset into directory `./dataset`. It takes [6.6 GB] total. Alternatively, run `bash ./scripts/get_dataset_valonly.sh` to only download the validation set [1.3 GB].
+Run `bash ./scripts/download_dataset.sh` to download and unzip the dataset into directory `./dataset`. It takes [6.6 GB] total. Alternatively, run `bash ./scripts/download_dataset_valonly.sh` to only download the validation set [1.3 GB].
 - 2AFC train [5.3 GB]
 - 2AFC val [1.1 GB]
 - JND val [0.2 GB]  
