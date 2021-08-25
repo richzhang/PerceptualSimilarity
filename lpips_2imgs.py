@@ -26,6 +26,3 @@ if(opt.use_gpu):
 # Compute distance
 dist01 = loss_fn.forward(img0, img1)
 print('Distance: %.3f'%dist01)
-
-dist01 = loss_fn.forward(img0, img1, retPerLayer=True)
-print(dist01)
