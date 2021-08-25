@@ -22,8 +22,40 @@ def upsample(in_tens, out_HW=(64,64)): # assumes scale factor is same for H and 
 class LPIPS(nn.Module):
     def __init__(self, pretrained=True, net='alex', version='0.1', lpips=True, spatial=False, 
         pnet_rand=False, pnet_tune=False, use_dropout=True, model_path=None, eval_mode=True, verbose=True):
-        # lpips - [True] means with linear calibration on top of base network
-        # pretrained - [True] means load linear weights
+        """ Initializes a perceptual loss torch.nn.Module
+
+        Parameters (default listed first)
+        ---------------------------------
+        lpips : bool
+            [True] use linear layers on top of base/trunk network
+            [False] means no linear layers; each layer is averaged together
+        pretrained : bool
+            This flag controls the linear layers, which are only in effect when lpips=True above
+            [True] means linear layers are calibrated with human perceptual judgments
+            [False] means linear layers are randomly initialized
+        pnet_rand : bool
+            [False] means trunk loaded with ImageNet classification weights
+            [True] means randomly initialized trunk
+        net : str
+            ['alex','vgg','squeeze'] are the base/trunk networks available
+        version : str
+            ['v0.1'] is the default and latest
+            ['v0.0'] contained a normalization bug; corresponds to old arxiv v1 (https://arxiv.org/abs/1801.03924v1)
+        model_path : 'str'
+            [None] is default and loads the pretrained weights from paper https://arxiv.org/abs/1801.03924v1
+
+        The following parameters should only be changed if training the network
+
+        eval_mode : bool
+            [True] is for test mode (default)
+            [False] is for training mode
+        pnet_tune
+            [False] tune the base/trunk network
+            [True] keep base/trunk frozen
+        use_dropout : bool
+            [True] to use dropout when training linear layers
+            [False] for no dropout when training linear layers
+        """
 
         super(LPIPS, self).__init__()
         if(verbose):
@@ -102,19 +134,9 @@ class LPIPS(nn.Module):
             else:
                 res = [spatial_average(diffs[kk].sum(dim=1,keepdim=True), keepdim=True) for kk in range(self.L)]
 
-        val = res[0]
-        for l in range(1,self.L):
+        val = 0
+        for l in range(self.L):
             val += res[l]
-
-        # a = spatial_average(self.lins[kk](diffs[kk]), keepdim=True)
-        # b = torch.max(self.lins[kk](feats0[kk]**2))
-        # for kk in range(self.L):
-        #     a += spatial_average(self.lins[kk](diffs[kk]), keepdim=True)
-        #     b = torch.max(b,torch.max(self.lins[kk](feats0[kk]**2)))
-        # a = a/self.L
-        # from IPython import embed
-        # embed()
-        # return 10*torch.log10(b/a)
         
         if(retPerLayer):
             return (val, res)

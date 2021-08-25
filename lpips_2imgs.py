@@ -24,5 +24,8 @@ if(opt.use_gpu):
 	img1 = img1.cuda()
 
 # Compute distance
-dist01 = loss_fn.forward(img0,img1)
+dist01 = loss_fn.forward(img0, img1)
 print('Distance: %.3f'%dist01)
+
+dist01 = loss_fn.forward(img0, img1, retPerLayer=True)
+print(dist01)
