@@ -21,7 +21,7 @@ parser.add_argument('--from_scratch', action='store_true', help='model was initi
 parser.add_argument('--train_trunk', action='store_true', help='model trunk was trained/tuned')
 parser.add_argument('--version', type=str, default='0.1', help='v0.1 is latest, v0.0 was original release')
 
-opt = parser.parse_args()
+opt = parser.parse_args() 
 if(opt.model in ['l2','ssim']):
 	opt.batch_size = 1
 
