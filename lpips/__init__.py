@@ -24,13 +24,6 @@ def dssim(p0, p1, range=255.):
     from skimage.measure import compare_ssim
     return (1 - compare_ssim(p0, p1, data_range=range, multichannel=True)) / 2.
 
-def rgb2lab(in_img,mean_cent=False):
-    from skimage import color
-    img_lab = color.rgb2lab(in_img)
-    if(mean_cent):
-        img_lab[:,:,0] = img_lab[:,:,0]-50
-    return img_lab
-
 def tensor2np(tensor_obj):
     # change dimension of a tensor object into a numpy array
     return tensor_obj[0].cpu().float().numpy().transpose((1,2,0))
@@ -84,9 +77,16 @@ def load_image(path):
 
     return img
 
-def rgb2lab(input):
-    from skimage import color
-    return color.rgb2lab(input / 255.)
+# def rgb2lab(input):
+#     from skimage import color
+#     return color.rgb2lab(input / 255.)
+
+# def rgb2lab(in_img,mean_cent=False):
+#     from skimage import color
+#     img_lab = color.rgb2lab(in_img)
+#     if(mean_cent):
+#         img_lab[:,:,0] = img_lab[:,:,0]-50
+#     return img_lab
 
 def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=255./2.):
     image_numpy = image_tensor[0].cpu().float().numpy()
@@ -99,19 +99,6 @@ def im2tensor(image, imtype=np.uint8, cent=1., factor=255./2.):
 
 def tensor2vec(vector_tensor):
     return vector_tensor.data.cpu().numpy()[:, :, 0, 0]
-
-
-def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=255./2.):
-# def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=1.):
-    image_numpy = image_tensor[0].cpu().float().numpy()
-    image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + cent) * factor
-    return image_numpy.astype(imtype)
-
-def im2tensor(image, imtype=np.uint8, cent=1., factor=255./2.):
-# def im2tensor(image, imtype=np.uint8, cent=1., factor=1.):
-    return torch.Tensor((image / factor - cent)
-                        [:, :, :, np.newaxis].transpose((3, 2, 0, 1)))
-
 
 
 def voc_ap(rec, prec, use_07_metric=False):
