@@ -77,17 +77,6 @@ def load_image(path):
 
     return img
 
-# def rgb2lab(input):
-#     from skimage import color
-#     return color.rgb2lab(input / 255.)
-
-# def rgb2lab(in_img,mean_cent=False):
-#     from skimage import color
-#     img_lab = color.rgb2lab(in_img)
-#     if(mean_cent):
-#         img_lab[:,:,0] = img_lab[:,:,0]-50
-#     return img_lab
-
 def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=255./2.):
     image_numpy = image_tensor[0].cpu().float().numpy()
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + cent) * factor
