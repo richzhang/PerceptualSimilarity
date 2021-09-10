@@ -50,8 +50,8 @@ class LPIPS(nn.Module):
             [True] is for test mode (default)
             [False] is for training mode
         pnet_tune
-            [False] tune the base/trunk network
-            [True] keep base/trunk frozen
+            [False] keep base/trunk frozen
+            [True] tune the base/trunk network
         use_dropout : bool
             [True] to use dropout when training linear layers
             [False] for no dropout when training linear layers
