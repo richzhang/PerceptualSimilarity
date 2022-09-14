@@ -4,7 +4,6 @@ import numpy as np
 from PIL import Image
 import numpy as np
 import os
-import matplotlib.pyplot as plt
 import torch
 
 def load_image(path):
@@ -16,6 +15,7 @@ def load_image(path):
         import cv2
         return cv2.imread(path)[:,:,::-1]
     else:
+        import matplotlib.pyplot as plt
         img = (255*plt.imread(path)[:,:,:3]).astype('uint8')
 
     return img
