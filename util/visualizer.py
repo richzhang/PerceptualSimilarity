@@ -5,7 +5,11 @@ from . import util
 from . import html
 import matplotlib.pyplot as plt
 import math
-# from IPython import embed
+
+try:
+    from IPython import embed
+except ModuleNotFoundError:
+    embed = lambda: None
 
 def zoom_to_res(img,res=256,order=0,axis=0):
     # img   3xXxX
