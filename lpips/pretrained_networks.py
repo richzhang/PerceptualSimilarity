@@ -1,11 +1,20 @@
 from collections import namedtuple
+from packaging import version
 import torch
+import torchvision
 from torchvision import models as tv
 
 class squeezenet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
         super(squeezenet, self).__init__()
-        pretrained_features = tv.squeezenet1_1(pretrained=pretrained).features
+        if version.parse(torchvision.__version__) >= version.parse('0.13'):
+            if pretrained:
+                pretrained_features = tv.squeezenet1_1(weights=tv.SqueezeNet1_1_Weights.IMAGENET1K_V1).features
+            else:
+                pretrained_features = tv.squeezenet1_1(weights=None).features
+        else: #torchvision.__version__ < 0.13
+            pretrained_features = tv.squeezenet1_1(pretrained=pretrained).features
+
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -56,7 +65,14 @@ class squeezenet(torch.nn.Module):
 class alexnet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
         super(alexnet, self).__init__()
-        alexnet_pretrained_features = tv.alexnet(pretrained=pretrained).features
+        if version.parse(torchvision.__version__) >= version.parse('0.13'):
+            if pretrained:
+                alexnet_pretrained_features = tv.alexnet(weights=tv.AlexNet_Weights.IMAGENET1K_V1).features
+            else:
+                alexnet_pretrained_features = tv.alexnet(weights=None).features
+        else:  # torchvision.__version__ < 0.13
+            alexnet_pretrained_features = tv.alexnet(pretrained=pretrained).features
+
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -96,7 +112,14 @@ class alexnet(torch.nn.Module):
 class vgg16(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
         super(vgg16, self).__init__()
-        vgg_pretrained_features = tv.vgg16(pretrained=pretrained).features
+        if version.parse(torchvision.__version__) >= version.parse('0.13'):
+            if pretrained:
+                vgg_pretrained_features = tv.vgg16(weights=tv.VGG16_Weights.IMAGENET1K_V1).features
+            else:
+                vgg_pretrained_features = tv.vgg16(weights=None).features
+        else:  # torchvision.__version__ < 0.13
+            vgg_pretrained_features = tv.vgg16(pretrained=pretrained).features
+
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -139,15 +162,45 @@ class resnet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True, num=18):
         super(resnet, self).__init__()
         if(num==18):
-            self.net = tv.resnet18(pretrained=pretrained)
+            if version.parse(torchvision.__version__) >= version.parse('0.13'):
+                if pretrained:
+                    self.net = tv.resnet18(weights=tv.ResNet18_Weights.IMAGENET1K_V1)
+                else:
+                    self.net = tv.resnet18(weights=None)
+            else:  # torchvision.__version__ < 0.13
+                self.net = tv.resnet18(pretrained=pretrained)
         elif(num==34):
-            self.net = tv.resnet34(pretrained=pretrained)
+            if version.parse(torchvision.__version__) >= version.parse('0.13'):
+                if pretrained:
+                    self.net = tv.resnet34(weights=tv.ResNet34_Weights.IMAGENET1K_V1)
+                else:
+                    self.net = tv.resnet34(weights=None)
+            else:  # torchvision.__version__ < 0.13
+                self.net = tv.resnet34(pretrained=pretrained)
         elif(num==50):
-            self.net = tv.resnet50(pretrained=pretrained)
+            if version.parse(torchvision.__version__) >= version.parse('0.13'):
+                if pretrained:
+                    self.net = tv.resnet50(weights=tv.ResNet50_Weights.IMAGENET1K_V1)
+                else:
+                    self.net = tv.resnet50(weights=None)
+            else:  # torchvision.__version__ < 0.13
+                self.net = tv.resnet50(pretrained=pretrained)
         elif(num==101):
-            self.net = tv.resnet101(pretrained=pretrained)
+            if version.parse(torchvision.__version__) >= version.parse('0.13'):
+                if pretrained:
+                    self.net = tv.resnet101(weights=tv.ResNet101_Weights.IMAGENET1K_V1)
+                else:
+                    self.net = tv.resnet101(weights=None)
+            else:  # torchvision.__version__ < 0.13
+                self.net = tv.resnet101(pretrained=pretrained)
         elif(num==152):
-            self.net = tv.resnet152(pretrained=pretrained)
+            if version.parse(torchvision.__version__) >= version.parse('0.13'):
+                if pretrained:
+                    self.net = tv.resnet152(weights=tv.ResNet152_Weights.IMAGENET1K_V1)
+                else:
+                    self.net = tv.resnet152(weights=None)
+            else:  # torchvision.__version__ < 0.13
+                self.net = tv.resnet152(pretrained=pretrained)
         self.N_slices = 5
 
         self.conv1 = self.net.conv1
