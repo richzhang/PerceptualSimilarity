@@ -216,7 +216,7 @@ class L2(FakeNet):
             ret_var = Variable( torch.Tensor((value,) ) )
             if(self.use_gpu):
                 ret_var = ret_var.cuda()
-            return ret_var
+            return ret_var.reshape(-1,1,1,1)
 
 class DSSIM(FakeNet):
 
@@ -231,7 +231,7 @@ class DSSIM(FakeNet):
         ret_var = Variable( torch.Tensor((value,) ) )
         if(self.use_gpu):
             ret_var = ret_var.cuda()
-        return ret_var
+        return ret_var.reshape(-1,1,1,1)
 
 def print_network(net):
     num_params = 0
