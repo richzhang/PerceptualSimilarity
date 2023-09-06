@@ -110,6 +110,9 @@ class LPIPS(nn.Module):
             self.eval()
 
     def forward(self, in0, in1, retPerLayer=False, normalize=False):
+        batch_size0 = in0.shape[0]
+        batch_size1 = in1.shape[0]
+
         if normalize: # turn on this flag if input is [0,1] so it can be adjusted to [-1, +1]
             in0 = 2 * in0  - 1
             in1 = 2 * in1  - 1
@@ -121,7 +124,9 @@ class LPIPS(nn.Module):
 
         for kk in range(self.L):
             feats0[kk], feats1[kk] = lpips.normalize_tensor(outs0[kk]), lpips.normalize_tensor(outs1[kk])
-            diffs[kk] = (feats0[kk]-feats1[kk])**2
+            diffs[kk] = (feats0[kk][:, None] - feats1[kk][None]) ** 2
+            # put all pairwise differences in batch dimension
+            diffs[kk] = diffs[kk].view(batch_size0 * batch_size1, *diffs[kk].shape[2:])
 
         if(self.lpips):
             if(self.spatial):
@@ -133,6 +138,12 @@ class LPIPS(nn.Module):
                 res = [upsample(diffs[kk].sum(dim=1,keepdim=True), out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
                 res = [spatial_average(diffs[kk].sum(dim=1,keepdim=True), keepdim=True) for kk in range(self.L)]
+
+        # unpack again to get batch_size0 x batch_size1 outputs for all pairwise distances
+        if(self.spatial):
+            res = [r.view(batch_size0, batch_size1, *r.shape[1:]) for r in res]
+        else:
+            res = [r.view(batch_size0, batch_size1) for r in res]
 
         val = 0
         for l in range(self.L):
