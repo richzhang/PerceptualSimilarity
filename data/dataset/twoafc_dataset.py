@@ -28,7 +28,7 @@ class TwoAFCDataset(BaseDataset):
         self.p1_paths = sorted(self.p1_paths)
 
         transform_list = []
-        transform_list.append(transforms.Scale(load_size))
+        transform_list.append(transforms.Resize(load_size))
         transform_list += [transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5),(0.5, 0.5, 0.5))]
 
