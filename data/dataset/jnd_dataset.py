@@ -5,7 +5,11 @@ from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
 import torch
-from IPython import embed
+
+try:
+    from IPython import embed
+except ModuleNotFoundError:
+    embed = lambda: None
 
 class JNDDataset(BaseDataset):
     def initialize(self, dataroot, load_size=64):

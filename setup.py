@@ -14,7 +14,22 @@ setuptools.setup(
      packages=['lpips'],
      package_data={'lpips': ['weights/v0.0/*.pth','weights/v0.1/*.pth']},
      include_package_data=True,
-     install_requires=["torch>=0.4.0", "torchvision>=0.2.1", "numpy>=1.14.3", "scipy>=1.0.1", "tqdm>=4.28.1"],
+     install_requires=[
+         "torch>=0.4.0",
+         "torchvision>=0.2.1",
+         "numpy>=1.14.3",
+         "scipy>=1.0.1",
+         "scikit-image>=0.13.0",
+         "tqdm>=4.28.1",
+     ],
+     extras_require = {
+         "dev": ["jupyter"],
+         "loadimage": [
+             "rawpy>=0.17.2",
+             "opencv-python>=2.4.11",
+             "matplotlib>=1.5.1",
+         ],
+     },
      classifiers=[
          "Programming Language :: Python :: 3",
          "License :: OSI Approved :: BSD License",

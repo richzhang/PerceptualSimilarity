@@ -2,7 +2,11 @@ import numpy as np
 import lpips
 from data import data_loader as dl
 import argparse
-from IPython import embed
+
+try:
+    from IPython import embed
+except ModuleNotFoundError:
+    embed = lambda: None
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_mode', type=str, default='2afc', help='[2afc,jnd]')
