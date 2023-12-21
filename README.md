@@ -173,7 +173,7 @@ You can also train "scratch" and "tune" versions by running `train_test_metric_s
 
 If you find this repository useful for your research, please use the following.
 
-```
+```bibtex
 @inproceedings{zhang2018perceptual,
   title={The Unreasonable Effectiveness of Deep Features as a Perceptual Metric},
   author={Zhang, Richard and Isola, Phillip and Efros, Alexei A and Shechtman, Eli and Wang, Oliver},
