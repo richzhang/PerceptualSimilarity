@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import numpy as np
 from PIL import Image
-import numpy as np
 import os
 import matplotlib.pyplot as plt
 import torch
